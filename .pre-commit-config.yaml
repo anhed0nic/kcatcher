@@ -1,0 +1,8 @@
+# Copyright (c) RoseSecurity
+# SPDX-License-Identifier: Apache-2.0
+
+repos:
+  - repo: https://github.com/hashicorp/copywrite
+    rev: v0.22.0
+    hooks:
+      - id: add-headers
