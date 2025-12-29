@@ -16,6 +16,13 @@ import (
 
 // EnumerateBrokers connects to Kafka brokers and lists cluster metadata.
 func EnumerateBrokers(cmd *cobra.Command, args []string) error {
+	if len(Cfg.Brokers) == 0 {
+		fmt.Println()
+		utils.PrintStyledText("kcatcher")
+		cmd.Help() // Print help to explain the required flags
+		return nil
+	}
+
 	// Validate brokers
 	if err := utils.ValidateBrokers(Cfg.Brokers); err != nil {
 		return err
