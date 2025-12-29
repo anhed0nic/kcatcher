@@ -1,0 +1,48 @@
+// Copyright (c) RoseSecurity
+// SPDX-License-Identifier: Apache-2.0
+
+// Package cmd provides the CLI commands, arguments, and flags.
+package cmd
+
+import (
+	"time"
+
+	i "github.com/RoseSecurity/kcatcher/internal"
+	"github.com/spf13/cobra"
+)
+
+var rootCmd = &cobra.Command{
+	Use:          "kcatcher",
+	Short:        "A utility for enumerating and evaluating secure Kafka configurations.",
+	Long:         `A utility for enumerating and evaluating secure Kafka configurations.`,
+	RunE:         i.EnumerateBrokers,
+	SilenceUsage: true,
+}
+
+func init() {
+	// Initialize with defaults
+	i.Cfg = i.DefaultConfig()
+
+	// Connection flags
+	rootCmd.PersistentFlags().StringSliceVarP(&i.Cfg.Brokers, "brokers", "b", []string{}, "A list of Kafka brokers to enumerate.")
+	rootCmd.PersistentFlags().IntVarP(&i.Cfg.Port, "port", "p", 9092, "The port to use when connecting to Kafka brokers.")
+	rootCmd.PersistentFlags().DurationVarP(&i.Cfg.Timeout, "timeout", "t", 10*time.Second, "Connection timeout duration.")
+
+	// Output format flag
+	rootCmd.PersistentFlags().StringVarP(&i.Cfg.OutputFormat, "output", "o", "text", "Output format: text, json (default: text)")
+
+	// Message sampling flags
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.SampleTopic, "sample-topic", "", "Topic to sample messages from")
+	rootCmd.PersistentFlags().IntVar(&i.Cfg.SampleCount, "sample-count", 10, "Number of messages to sample (default: 10)")
+
+	// ACL enumeration flag
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.EnumerateACLs, "acls", false, "Enumerate all ACLs")
+
+	// Keep generated docs clean.
+	rootCmd.DisableAutoGenTag = true
+}
+
+// Execute the root command and return the error to main to surface to the user.
+func Execute() error {
+	return rootCmd.Execute()
+}
