@@ -14,8 +14,9 @@ import (
 
 // Client wraps the franz-go Kafka client for metadata operations.
 type Client struct {
-	client *kgo.Client
-	admin  *kadm.Client
+	client  *kgo.Client
+	admin   *kadm.Client
+	brokers []string
 }
 
 // NewClient creates a new Kafka client with the given broker addresses.
@@ -30,8 +31,9 @@ func NewClient(brokers []string, timeout time.Duration) (*Client, error) {
 	}
 
 	return &Client{
-		client: client,
-		admin:  kadm.NewClient(client),
+		client:  client,
+		admin:   kadm.NewClient(client),
+		brokers: brokers,
 	}, nil
 }
 

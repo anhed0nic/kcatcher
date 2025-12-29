@@ -13,6 +13,17 @@ type Config struct {
 	Port int
 	// Timeout is the connection/operation timeout.
 	Timeout time.Duration
+
+	// OutputFormat specifies the output format: "text" or "json".
+	OutputFormat string
+
+	// SampleTopic is the topic to sample messages from.
+	SampleTopic string
+	// SampleCount is the number of messages to sample.
+	SampleCount int
+
+	// EnumerateACLs enables ACL enumeration.
+	EnumerateACLs bool
 }
 
 // Cfg is the global configuration instance.
@@ -21,8 +32,12 @@ var Cfg Config
 // DefaultConfig returns a Config with sensible defaults.
 func DefaultConfig() Config {
 	return Config{
-		Brokers: []string{},
-		Port:    9092,
-		Timeout: 10 * time.Second,
+		Brokers:       []string{},
+		Port:          9092,
+		Timeout:       10 * time.Second,
+		OutputFormat:  "text",
+		SampleTopic:   "",
+		SampleCount:   10,
+		EnumerateACLs: false,
 	}
 }

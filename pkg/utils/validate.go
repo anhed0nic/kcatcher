@@ -22,7 +22,7 @@ func ValidateBrokers(brokers []string) error {
 
 	for _, broker := range brokers {
 		if !isValidBroker(broker) {
-			return e.ErrInvalidBroker
+			return e.NewErrInvalidBroker(broker)
 		}
 	}
 

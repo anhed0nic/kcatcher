@@ -3,9 +3,14 @@
 
 package errors
 
-import "errors"
-
-var (
-	ErrNoBrokers     = errors.New("no brokers provided; use --brokers/-b to specify")
-	ErrInvalidBroker = errors.New("invalid broker address; must be IP, hostname, or FQDN")
+import (
+	"errors"
+	"fmt"
 )
+
+var ErrNoBrokers = errors.New("no brokers provided; use --brokers/-b to specify")
+
+// NewErrInvalidBroker creates an error indicating which broker address is invalid.
+func NewErrInvalidBroker(broker string) error {
+	return fmt.Errorf("invalid broker address %q; must be IP, hostname, or FQDN", broker)
+}

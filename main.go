@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/RoseSecurity/kcatcher/cmd"
 )
@@ -14,6 +15,7 @@ import (
 // The Execute function runs the root command and returns the error to main to surface to the user.
 func main() {
 	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
