@@ -3,7 +3,7 @@ Output kcatcher-demo.gif
 Set WindowBar Colorful
 Set CursorBlink true
 Set Margin 20
-Set MarginFill "#674EFF"
+Set MarginFill "#3D4F5F"
 Set TypingSpeed 75ms
 Set Theme "Monokai Vivid"
 Set Padding 12
