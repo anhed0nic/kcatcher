@@ -1,3 +1,6 @@
+<p align="center">
+  <img width="657" height="380" alt="kcatcher-logo" src="https://github.com/user-attachments/assets/618e8ff0-6b74-4e12-825b-7613d3b17e15" />
+</p>
 
 <p align="center">
   <em>Catch what's lurking in your Kafka clusters.</em>
@@ -5,9 +8,11 @@
 
 ## Introduction
 
-Kcatcher is a command-line utility for enumerating and evaluating Kafka cluster configurations. It connects to Apache Kafka clusters and retrieves detailed information about brokers, topics, ACLs, and even samples messages—all in a terminal-friendly format. Perfect for security audits, infrastructure assessments, or just understanding what's running in your Kafka environment.
+Kcatcher is a command-line utility for enumerating and evaluating Kafka cluster configurations. It connects to Apache Kafka clusters and retrieves detailed information about brokers, topics, ACLs, and even samples messages. Perfect for security audits, infrastructure assessments, or just understanding what's running in your Kafka environment.
 
 ## Demo
+
+![kcatcher-demo](https://github.com/user-attachments/assets/88db1acc-b3b5-43e1-a40e-678b04b9ec92)
 
 ## Installation
 
