@@ -38,6 +38,15 @@ func init() {
 	// ACL enumeration flag
 	rootCmd.PersistentFlags().BoolVar(&i.Cfg.EnumerateACLs, "acls", false, "Enumerate all ACLs")
 
+	// Configuration enumeration flag
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.EnumerateConfigs, "configs", false, "Enumerate broker and topic configurations")
+
+	// Security analysis flag
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.RunAnalysis, "analyze", false, "Run security analysis on cluster configuration")
+
+	// Metadata display flag
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.ShowMetadata, "metadata", false, "Show cluster metadata (auto-enabled unless --analyze is used)")
+
 	// Keep generated docs clean.
 	rootCmd.DisableAutoGenTag = true
 }

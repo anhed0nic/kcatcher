@@ -9,6 +9,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/RoseSecurity/kcatcher/internal/analyzer"
 	"github.com/RoseSecurity/kcatcher/internal/kafka"
 	"github.com/RoseSecurity/kcatcher/internal/output"
 	"github.com/RoseSecurity/kcatcher/pkg/utils"
@@ -52,20 +53,49 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 	// Collect all data
 	data := &output.OutputData{}
 
-	// Always get metadata
+	// Determine if we should show metadata
+	// Auto-enable metadata display unless --analyze is used (can override with --metadata)
+	showMetadata := Cfg.ShowMetadata || !Cfg.RunAnalysis
+
+	// Always get metadata (needed internally even if not displayed)
 	metadata, err := client.GetMetadata(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve metadata: %w", err)
 	}
-	data.Metadata = convertMetadata(metadata)
 
-	// Get ACLs if requested
-	if Cfg.EnumerateACLs {
-		acls, err := client.GetACLs(ctx)
+	// Only include in output if showing metadata
+	if showMetadata {
+		data.Metadata = convertMetadata(metadata)
+	}
+
+	// Track raw data for analysis
+	var clusterConfigs *kafka.ClusterConfigs
+	var aclEntries []kafka.ACLEntry
+
+	// Get configs if requested or needed for analysis
+	if Cfg.EnumerateConfigs || Cfg.RunAnalysis {
+		clusterConfigs, err = client.GetClusterConfigs(ctx)
 		if err != nil {
-			return fmt.Errorf("failed to enumerate ACLs: %w", err)
+			return fmt.Errorf("failed to enumerate configs: %w", err)
 		}
-		data.ACLs = convertACLs(acls)
+		if Cfg.EnumerateConfigs {
+			data.Configs = convertConfigs(clusterConfigs)
+		}
+	}
+
+	// Get ACLs if requested or needed for analysis
+	if Cfg.EnumerateACLs || Cfg.RunAnalysis {
+		aclEntries, err = client.GetACLs(ctx)
+		if err != nil {
+			// ACL enumeration may fail if no authorizer is configured
+			// For analysis, we continue without ACLs
+			if !Cfg.RunAnalysis {
+				return fmt.Errorf("failed to enumerate ACLs: %w", err)
+			}
+		}
+		if Cfg.EnumerateACLs && err == nil {
+			data.ACLs = convertACLs(aclEntries)
+		}
 	}
 
 	// Sample messages if requested
@@ -75,6 +105,19 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("failed to sample messages: %w", err)
 		}
 		data.Samples = convertSamples(samples)
+	}
+
+	// Run security analysis if requested
+	if Cfg.RunAnalysis {
+		analysisCtx := &analyzer.AnalysisContext{
+			Metadata: data.Metadata,
+			Configs:  clusterConfigs,
+			ACLs:     aclEntries,
+		}
+
+		engine := analyzer.DefaultEngine()
+		result := engine.Analyze(analysisCtx)
+		data.Analysis = convertAnalysisResult(result)
 	}
 
 	// Format and output
@@ -175,5 +218,88 @@ func convertSamples(samples []kafka.SampledMessage) []output.SampleOutput {
 
 		out = append(out, sample)
 	}
+	return out
+}
+
+// convertConfigs converts kafka.ClusterConfigs to output.ConfigsOutput.
+func convertConfigs(configs *kafka.ClusterConfigs) *output.ConfigsOutput {
+	out := &output.ConfigsOutput{
+		Brokers: make([]output.BrokerConfigOutput, 0, len(configs.BrokerConfigs)),
+		Topics:  make([]output.TopicConfigOutput, 0, len(configs.TopicConfigs)),
+	}
+
+	// Convert broker configs
+	for _, broker := range configs.BrokerConfigs {
+		brokerOut := output.BrokerConfigOutput{
+			BrokerID: broker.BrokerID,
+			Configs:  make([]output.ConfigEntryOutput, 0, len(broker.Configs)),
+		}
+		for _, cfg := range broker.Configs {
+			brokerOut.Configs = append(brokerOut.Configs, output.ConfigEntryOutput{
+				Name:      cfg.Name,
+				Value:     cfg.Value,
+				Source:    cfg.Source,
+				Sensitive: cfg.Sensitive,
+				ReadOnly:  cfg.ReadOnly,
+			})
+		}
+		out.Brokers = append(out.Brokers, brokerOut)
+	}
+
+	// Convert topic configs
+	for _, topic := range configs.TopicConfigs {
+		topicOut := output.TopicConfigOutput{
+			TopicName: topic.TopicName,
+			Configs:   make([]output.ConfigEntryOutput, 0, len(topic.Configs)),
+		}
+		for _, cfg := range topic.Configs {
+			topicOut.Configs = append(topicOut.Configs, output.ConfigEntryOutput{
+				Name:      cfg.Name,
+				Value:     cfg.Value,
+				Source:    cfg.Source,
+				Sensitive: cfg.Sensitive,
+				ReadOnly:  cfg.ReadOnly,
+			})
+		}
+		out.Topics = append(out.Topics, topicOut)
+	}
+
+	return out
+}
+
+// convertAnalysisResult converts analyzer.AnalysisResult to output.AnalysisOutput.
+func convertAnalysisResult(result *analyzer.AnalysisResult) *output.AnalysisOutput {
+	out := &output.AnalysisOutput{
+		Summary: &output.AnalysisSummaryOutput{
+			TotalFindings: result.Summary.TotalFindings,
+			BySeverity:    result.Summary.BySeverity,
+			ByCategory:    result.Summary.ByCategory,
+			CriticalCount: result.Summary.CriticalCount,
+			HighCount:     result.Summary.HighCount,
+			MediumCount:   result.Summary.MediumCount,
+			LowCount:      result.Summary.LowCount,
+			InfoCount:     result.Summary.InfoCount,
+			SecurityScore: result.Summary.SecurityScore,
+			SecurityGrade: result.Summary.SecurityGrade,
+		},
+		Findings: make([]output.FindingOutput, 0, len(result.Findings)),
+	}
+
+	for _, f := range result.Findings {
+		out.Findings = append(out.Findings, output.FindingOutput{
+			RuleID:        f.RuleID,
+			Title:         f.Title,
+			Description:   f.Description,
+			Severity:      f.Severity.String(),
+			Category:      string(f.Category),
+			Resource:      f.Resource,
+			ResourceType:  f.ResourceType,
+			CurrentValue:  f.CurrentValue,
+			ExpectedValue: f.ExpectedValue,
+			Remediation:   f.Remediation,
+			References:    f.References,
+		})
+	}
+
 	return out
 }

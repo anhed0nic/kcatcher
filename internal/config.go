@@ -24,6 +24,15 @@ type Config struct {
 
 	// EnumerateACLs enables ACL enumeration.
 	EnumerateACLs bool
+
+	// EnumerateConfigs enables broker and topic configuration retrieval.
+	EnumerateConfigs bool
+
+	// RunAnalysis enables security analysis of the cluster configuration.
+	RunAnalysis bool
+
+	// ShowMetadata explicitly shows metadata output (auto-enabled unless --analyze is used).
+	ShowMetadata bool
 }
 
 // Cfg is the global configuration instance.
@@ -32,12 +41,15 @@ var Cfg Config
 // DefaultConfig returns a Config with sensible defaults.
 func DefaultConfig() Config {
 	return Config{
-		Brokers:       []string{},
-		Port:          9092,
-		Timeout:       10 * time.Second,
-		OutputFormat:  "text",
-		SampleTopic:   "",
-		SampleCount:   10,
-		EnumerateACLs: false,
+		Brokers:          []string{},
+		Port:             9092,
+		Timeout:          10 * time.Second,
+		OutputFormat:     "text",
+		SampleTopic:      "",
+		SampleCount:      10,
+		EnumerateACLs:    false,
+		EnumerateConfigs: false,
+		RunAnalysis:      false,
+		ShowMetadata:     false,
 	}
 }

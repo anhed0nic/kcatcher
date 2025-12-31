@@ -7,9 +7,11 @@ import "time"
 
 // OutputData represents all data that can be formatted for output.
 type OutputData struct {
-	Metadata *MetadataOutput `json:"metadata,omitempty"`
-	ACLs     []ACLOutput     `json:"acls,omitempty"`
-	Samples  []SampleOutput  `json:"samples,omitempty"`
+	Metadata *MetadataOutput  `json:"metadata,omitempty"`
+	Configs  *ConfigsOutput   `json:"configs,omitempty"`
+	ACLs     []ACLOutput      `json:"acls,omitempty"`
+	Samples  []SampleOutput   `json:"samples,omitempty"`
+	Analysis *AnalysisOutput  `json:"analysis,omitempty"`
 }
 
 // MetadataOutput represents cluster metadata in a serializable format.
@@ -61,4 +63,66 @@ type SampleOutput struct {
 	Value       string    `json:"value"`
 	ValueBase64 string    `json:"value_base64,omitempty"`
 	IsBinary    bool      `json:"is_binary"`
+}
+
+// ConfigsOutput represents cluster configurations.
+type ConfigsOutput struct {
+	Brokers []BrokerConfigOutput `json:"brokers"`
+	Topics  []TopicConfigOutput  `json:"topics"`
+}
+
+// BrokerConfigOutput represents a broker's configuration.
+type BrokerConfigOutput struct {
+	BrokerID int32                `json:"broker_id"`
+	Configs  []ConfigEntryOutput  `json:"configs"`
+}
+
+// TopicConfigOutput represents a topic's configuration.
+type TopicConfigOutput struct {
+	TopicName string              `json:"topic_name"`
+	Configs   []ConfigEntryOutput `json:"configs"`
+}
+
+// ConfigEntryOutput represents a single configuration entry.
+type ConfigEntryOutput struct {
+	Name      string `json:"name"`
+	Value     string `json:"value"`
+	Source    string `json:"source"`
+	Sensitive bool   `json:"sensitive"`
+	ReadOnly  bool   `json:"read_only"`
+}
+
+// AnalysisOutput represents the security analysis results.
+type AnalysisOutput struct {
+	Summary  *AnalysisSummaryOutput `json:"summary"`
+	Findings []FindingOutput        `json:"findings"`
+}
+
+// AnalysisSummaryOutput provides aggregate statistics about the analysis.
+type AnalysisSummaryOutput struct {
+	TotalFindings int            `json:"total_findings"`
+	BySeverity    map[string]int `json:"by_severity"`
+	ByCategory    map[string]int `json:"by_category"`
+	CriticalCount int            `json:"critical_count"`
+	HighCount     int            `json:"high_count"`
+	MediumCount   int            `json:"medium_count"`
+	LowCount      int            `json:"low_count"`
+	InfoCount     int            `json:"info_count"`
+	SecurityScore float64        `json:"security_score"`
+	SecurityGrade string         `json:"security_grade"`
+}
+
+// FindingOutput represents a security finding.
+type FindingOutput struct {
+	RuleID        string   `json:"rule_id"`
+	Title         string   `json:"title"`
+	Description   string   `json:"description"`
+	Severity      string   `json:"severity"`
+	Category      string   `json:"category"`
+	Resource      string   `json:"resource"`
+	ResourceType  string   `json:"resource_type"`
+	CurrentValue  string   `json:"current_value,omitempty"`
+	ExpectedValue string   `json:"expected_value,omitempty"`
+	Remediation   string   `json:"remediation"`
+	References    []string `json:"references,omitempty"`
 }
