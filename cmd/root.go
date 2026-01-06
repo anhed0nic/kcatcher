@@ -47,6 +47,27 @@ func init() {
 	// Metadata display flag
 	rootCmd.PersistentFlags().BoolVar(&i.Cfg.ShowMetadata, "metadata", false, "Show cluster metadata (auto-enabled unless --analyze is used)")
 
+	// HIPAA compliance mode flag
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.HipaaMode, "hipaa-mode", false, "Enable HIPAA compliance mode: disables message sampling by default and adds PHI warnings")
+
+	// Audit log flag
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.AuditLogFile, "audit-log", "", "Path to audit log file for logging security events")
+
+	// Benchmark flag
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.Benchmark, "benchmark", false, "Enable performance benchmarking")
+
+	// SASL authentication flags
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.SASLMechanism, "sasl-mechanism", "", "SASL mechanism (SCRAM-SHA-256, SCRAM-SHA-512, PLAIN, etc.)")
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.SASLUsername, "sasl-username", "", "SASL username")
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.SASLPassword, "sasl-password", "", "SASL password")
+
+	// SSL/TLS flags
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.SSLEnabled, "ssl", false, "Enable SSL/TLS encryption")
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.SSLCertFile, "ssl-cert", "", "Path to SSL client certificate file")
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.SSLKeyFile, "ssl-key", "", "Path to SSL client key file")
+	rootCmd.PersistentFlags().StringVar(&i.Cfg.SSLCAFile, "ssl-ca", "", "Path to SSL CA certificate file")
+	rootCmd.PersistentFlags().BoolVar(&i.Cfg.MutualTLS, "mutual-tls", false, "Enable mutual TLS authentication (requires client cert)")
+
 	// Keep generated docs clean.
 	rootCmd.DisableAutoGenTag = true
 }

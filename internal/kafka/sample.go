@@ -69,10 +69,9 @@ func (c *Client) SampleMessages(ctx context.Context, topic string, count int) ([
 	}
 
 	// Create a new consumer client for sampling
-	consumer, err := kgo.NewClient(
-		kgo.SeedBrokers(c.brokers...),
-		kgo.ConsumePartitions(partitionOffsets),
-	)
+	opts := buildClientOpts(c.brokers, 0, c.auth)
+	opts = append(opts, kgo.ConsumePartitions(partitionOffsets))
+	consumer, err := kgo.NewClient(opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create consumer: %w", err)
 	}

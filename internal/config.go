@@ -33,6 +33,27 @@ type Config struct {
 
 	// ShowMetadata explicitly shows metadata output (auto-enabled unless --analyze is used).
 	ShowMetadata bool
+
+	// HipaaMode enables HIPAA compliance mode, disabling message sampling by default and adding warnings.
+	HipaaMode bool
+
+	// AuditLogFile specifies a file to log audit events.
+	AuditLogFile string
+
+	// Benchmark enables performance benchmarking.
+	Benchmark bool
+
+	// SASL authentication
+	SASLMechanism string
+	SASLUsername  string
+	SASLPassword  string
+
+	// SSL/TLS
+	SSLEnabled    bool
+	SSLCertFile   string
+	SSLKeyFile    string
+	SSLCAFile     string
+	MutualTLS     bool
 }
 
 // Cfg is the global configuration instance.
@@ -51,5 +72,16 @@ func DefaultConfig() Config {
 		EnumerateConfigs: false,
 		RunAnalysis:      false,
 		ShowMetadata:     false,
+		HipaaMode:        false,
+		AuditLogFile:     "",
+		Benchmark:        false,
+		SASLMechanism:    "",
+		SASLUsername:     "",
+		SASLPassword:     "",
+		SSLEnabled:       false,
+		SSLCertFile:      "",
+		SSLKeyFile:       "",
+		SSLCAFile:        "",
+		MutualTLS:        false,
 	}
 }

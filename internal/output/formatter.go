@@ -23,6 +23,8 @@ func NewFormatter(w io.Writer, format string) (Formatter, error) {
 		return &TextFormatter{writer: w}, nil
 	case "json":
 		return &JSONFormatter{writer: w}, nil
+	case "csv":
+		return &CSVFormatter{writer: w}, nil
 	default:
 		return nil, fmt.Errorf("unsupported output format: %s", format)
 	}
@@ -244,6 +246,46 @@ func (f *TextFormatter) formatFindings(findings []FindingOutput) {
 			fmt.Fprintf(f.writer, "\n  ──────────────────────────────────────────────────────────────\n\n")
 		}
 	}
+}
+
+// CSVFormatter outputs analysis results in CSV format.
+type CSVFormatter struct {
+	writer io.Writer
+}
+
+// Format outputs the data in CSV format (primarily for analysis results).
+func (f *CSVFormatter) Format(data *OutputData) error {
+	if data.Analysis == nil {
+		fmt.Fprintf(f.writer, "No analysis data available\n")
+		return nil
+	}
+
+	// CSV header
+	fmt.Fprintf(f.writer, "Rule ID,Title,Severity,Category,Resource,Resource Type,Current Value,Expected Value,Description,Remediation\n")
+
+	// CSV rows
+	for _, finding := range data.Analysis.Findings {
+		// Escape commas and quotes in fields
+		description := strings.ReplaceAll(finding.Description, ",", ";")
+		description = strings.ReplaceAll(description, "\"", "\"\"")
+		remediation := strings.ReplaceAll(finding.Remediation, ",", ";")
+		remediation = strings.ReplaceAll(remediation, "\"", "\"\"")
+
+		fmt.Fprintf(f.writer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
+			finding.RuleID,
+			finding.Title,
+			finding.Severity,
+			finding.Category,
+			finding.Resource,
+			finding.ResourceType,
+			finding.CurrentValue,
+			finding.ExpectedValue,
+			description,
+			remediation,
+		)
+	}
+
+	return nil
 }
 
 // wordWrap wraps text to the specified width.

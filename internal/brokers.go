@@ -7,7 +7,10 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"sort"
+	"strings"
+	"time"
 
 	"github.com/RoseSecurity/kcatcher/internal/analyzer"
 	"github.com/RoseSecurity/kcatcher/internal/kafka"
@@ -15,6 +18,55 @@ import (
 	"github.com/RoseSecurity/kcatcher/pkg/utils"
 	"github.com/spf13/cobra"
 )
+
+// anonymizeData masks potential PHI in the given text.
+func anonymizeData(text string) string {
+	// Mask email addresses
+	emailRegex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
+	text = emailRegex.ReplaceAllString(text, "[EMAIL_REDACTED]")
+
+	// Mask potential SSN (XXX-XX-XXXX)
+	ssnRegex := regexp.MustCompile(`\b\d{3}-\d{2}-\d{4}\b`)
+	text = ssnRegex.ReplaceAllString(text, "[SSN_REDACTED]")
+
+	// Mask phone numbers (simple pattern)
+	phoneRegex := regexp.MustCompile(`\b\d{3}-\d{3}-\d{4}\b`)
+	text = phoneRegex.ReplaceAllString(text, "[PHONE_REDACTED]")
+
+	// Mask credit card numbers (simple 16-digit)
+	ccRegex := regexp.MustCompile(`\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b`)
+	text = ccRegex.ReplaceAllString(text, "[CC_REDACTED]")
+
+	// Mask medical record numbers (MRN) - common patterns
+	mrnRegex := regexp.MustCompile(`\bMRN[:\s]*[A-Z0-9]{6,12}\b`)
+	text = mrnRegex.ReplaceAllString(text, "[MRN_REDACTED]")
+
+	// Mask ICD codes
+	icdRegex := regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
+	text = icdRegex.ReplaceAllString(text, "[ICD_REDACTED]")
+
+	// Mask dates of birth (DOB)
+	dobRegex := regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
+	text = dobRegex.ReplaceAllString(text, "[DOB_REDACTED]")
+
+	return text
+}
+
+// logAudit logs an audit event to the specified file if configured.
+func logAudit(message string) {
+	if Cfg.AuditLogFile == "" {
+		return
+	}
+	file, err := os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to open audit log: %v\n", err)
+		return
+	}
+	defer file.Close()
+	timestamp := time.Now().Format(time.RFC3339)
+	logEntry := fmt.Sprintf("[%s] %s\n", timestamp, message)
+	file.WriteString(logEntry)
+}
 
 // EnumerateBrokers connects to Kafka brokers and lists cluster metadata.
 func EnumerateBrokers(cmd *cobra.Command, args []string) error {
@@ -34,18 +86,43 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// HIPAA compliance warning
+	if Cfg.HipaaMode {
+		fmt.Println("WARNING: HIPAA compliance mode enabled. Message sampling is disabled by default to protect potential PHI. Use --sample-topic only if data is properly anonymized and compliant.")
+	}
+
+	logAudit(fmt.Sprintf("Connected to brokers: %s", strings.Join(Cfg.Brokers, ",")))
+
+	startTime := time.Now()
+	var connectionTime, metadataTime, configTime, aclTime, sampleTime, analysisTime time.Duration
+
 	// Format broker addresses with port
 	brokerAddrs := make([]string, len(Cfg.Brokers))
 	for i, broker := range Cfg.Brokers {
 		brokerAddrs[i] = fmt.Sprintf("%s:%d", broker, Cfg.Port)
 	}
 
+	// Create auth config
+	auth := &kafka.AuthConfig{
+		SASLMechanism: Cfg.SASLMechanism,
+		SASLUsername:  Cfg.SASLUsername,
+		SASLPassword:  Cfg.SASLPassword,
+		SSLEnabled:    Cfg.SSLEnabled,
+		SSLCertFile:   Cfg.SSLCertFile,
+		SSLKeyFile:    Cfg.SSLKeyFile,
+		SSLCAFile:     Cfg.SSLCAFile,
+		MutualTLS:     Cfg.MutualTLS,
+	}
+
 	// Create Kafka client
-	client, err := kafka.NewClient(brokerAddrs, Cfg.Timeout)
+	client, err := kafka.NewClient(brokerAddrs, Cfg.Timeout, auth)
 	if err != nil {
 		return fmt.Errorf("failed to connect to brokers: %w", err)
 	}
 	defer client.Close()
+
+	connectionTime = time.Since(startTime)
+	startTime = time.Now()
 
 	ctx, cancel := context.WithTimeout(context.Background(), Cfg.Timeout)
 	defer cancel()
@@ -62,6 +139,9 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to retrieve metadata: %w", err)
 	}
+
+	metadataTime = time.Since(startTime)
+	startTime = time.Now()
 
 	// Only include in output if showing metadata
 	if showMetadata {
@@ -83,6 +163,9 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	configTime = time.Since(startTime)
+	startTime = time.Now()
+
 	// Get ACLs if requested or needed for analysis
 	if Cfg.EnumerateACLs || Cfg.RunAnalysis {
 		aclEntries, err = client.GetACLs(ctx)
@@ -98,26 +181,52 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	aclTime = time.Since(startTime)
+	startTime = time.Now()
+
 	// Sample messages if requested
 	if Cfg.SampleTopic != "" {
 		samples, err := client.SampleMessages(ctx, Cfg.SampleTopic, Cfg.SampleCount)
 		if err != nil {
 			return fmt.Errorf("failed to sample messages: %w", err)
 		}
-		data.Samples = convertSamples(samples)
+		data.Samples = convertSamples(samples, Cfg.HipaaMode)
+		logAudit(fmt.Sprintf("Sampled %d messages from topic: %s (redacted: %t)", len(samples), Cfg.SampleTopic, Cfg.HipaaMode))
+		if Cfg.HipaaMode {
+			fmt.Println("WARNING: Message sampling performed with data redaction in HIPAA mode.")
+		}
 	}
+
+	sampleTime = time.Since(startTime)
+	startTime = time.Now()
 
 	// Run security analysis if requested
 	if Cfg.RunAnalysis {
 		analysisCtx := &analyzer.AnalysisContext{
-			Metadata: data.Metadata,
-			Configs:  clusterConfigs,
-			ACLs:     aclEntries,
+			Metadata:   data.Metadata,
+			Configs:    clusterConfigs,
+			ACLs:       aclEntries,
+			SampleTopic: Cfg.SampleTopic,
 		}
 
 		engine := analyzer.DefaultEngine()
 		result := engine.Analyze(analysisCtx)
 		data.Analysis = convertAnalysisResult(result)
+		logAudit(fmt.Sprintf("Performed security analysis: %d findings", len(result.Findings)))
+	}
+
+	analysisTime = time.Since(startTime)
+
+	// Print benchmark results if enabled
+	if Cfg.Benchmark {
+		fmt.Printf("\nPerformance Benchmark:\n")
+		fmt.Printf("  Connection Time: %v\n", connectionTime)
+		fmt.Printf("  Metadata Retrieval: %v\n", metadataTime)
+		fmt.Printf("  Config Retrieval: %v\n", configTime)
+		fmt.Printf("  ACL Retrieval: %v\n", aclTime)
+		fmt.Printf("  Message Sampling: %v\n", sampleTime)
+		fmt.Printf("  Security Analysis: %v\n", analysisTime)
+		fmt.Printf("  Total Time: %v\n", connectionTime+metadataTime+configTime+aclTime+sampleTime+analysisTime)
 	}
 
 	// Format and output
@@ -195,7 +304,7 @@ func convertACLs(acls []kafka.ACLEntry) []output.ACLOutput {
 }
 
 // convertSamples converts kafka.SampledMessage slice to output.SampleOutput slice.
-func convertSamples(samples []kafka.SampledMessage) []output.SampleOutput {
+func convertSamples(samples []kafka.SampledMessage, redact bool) []output.SampleOutput {
 	out := make([]output.SampleOutput, 0, len(samples))
 	for _, s := range samples {
 		sample := output.SampleOutput{
@@ -212,8 +321,13 @@ func convertSamples(samples []kafka.SampledMessage) []output.SampleOutput {
 			sample.Key = ""
 			sample.Value = ""
 		} else {
-			sample.Key = string(s.Key)
-			sample.Value = string(s.Value)
+			if redact {
+				sample.Key = anonymizeData(string(s.Key))
+				sample.Value = anonymizeData(string(s.Value))
+			} else {
+				sample.Key = string(s.Key)
+				sample.Value = string(s.Value)
+			}
 		}
 
 		out = append(out, sample)

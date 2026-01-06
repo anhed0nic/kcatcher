@@ -58,6 +58,20 @@ Connect to a Kafka cluster and retrieve broker and topic metadata:
 kcatcher -b kafka-broker-1,kafka-broker-2
 ```
 
+### Authenticated Connection
+
+Connect to a secured Kafka cluster with SASL/SCRAM and SSL:
+
+```sh
+kcatcher -b kafka-broker-1 --sasl-mechanism SCRAM-SHA-256 --sasl-username myuser --sasl-password mypass --ssl --ssl-ca ca.pem
+```
+
+For mutual TLS authentication:
+
+```sh
+kcatcher -b kafka-broker-1 --ssl --ssl-cert client.crt --ssl-key client.key --ssl-ca ca.pem --mutual-tls
+```
+
 ### Custom Port
 
 Specify a non-default Kafka port:
@@ -90,6 +104,44 @@ Output results in JSON format for further processing:
 kcatcher -b kafka-broker-1 --acls -o json
 ```
 
+### CSV Output
+
+Output analysis results in CSV format for spreadsheet analysis:
+
+```sh
+kcatcher -b kafka-broker-1 --analyze -o csv > analysis.csv
+```
+
+### HIPAA Compliance Mode
+
+For healthcare environments with Kafka clusters containing protected health information (PHI), use HIPAA compliance mode to disable message sampling by default and receive warnings about potential PHI exposure:
+
+```sh
+kcatcher -b kafka-broker-1 --hipaa-mode --analyze
+```
+
+This mode prevents accidental exposure of sensitive data and flags sampling as a high-risk activity in security analysis. When sampling is enabled in HIPAA mode, data is automatically anonymized to mask potential PHI like emails, SSNs, phone numbers, and credit card numbers.
+
+### Audit Logging
+
+For compliance and monitoring, enable audit logging to track tool usage:
+
+```sh
+kcatcher -b kafka-broker-1 --analyze --audit-log audit.log
+```
+
+The audit log records connection events, sampling activities, and analysis results with timestamps.
+
+### Performance Benchmarking
+
+Measure the performance of various operations:
+
+```sh
+kcatcher -b kafka-broker-1 --analyze --benchmark
+```
+
+This will display timing information for connection, metadata retrieval, configuration enumeration, ACL enumeration, message sampling, and security analysis.
+
 ### Configuration Enumeration
 
 Retrieve broker and topic configurations:
@@ -121,13 +173,24 @@ The security analysis evaluates your cluster against 20 built-in security rules 
 | `-b, --brokers` | List of Kafka brokers to enumerate (required) | - |
 | `-p, --port` | Kafka broker port | `9092` |
 | `-t, --timeout` | Connection timeout duration | `10s` |
-| `-o, --output` | Output format (`text` or `json`) | `text` |
+| `-o, --output` | Output format (`text`, `json`, or `csv`) | `text` |
 | `--acls` | Enable ACL enumeration | `false` |
 | `--configs` | Enable broker and topic configuration retrieval | `false` |
 | `--analyze` | Run security analysis on cluster configuration | `false` |
 | `--metadata` | Show cluster metadata (auto-enabled unless `--analyze` only) | `true` |
 | `--sample-topic` | Topic to sample messages from | - |
 | `--sample-count` | Number of messages to sample | `10` |
+| `--hipaa-mode` | Enable HIPAA compliance mode: disables message sampling by default | `false` |
+| `--audit-log` | Path to audit log file for logging security events | - |
+| `--benchmark` | Enable performance benchmarking | `false` |
+| `--sasl-mechanism` | SASL mechanism (SCRAM-SHA-256, SCRAM-SHA-512, PLAIN, etc.) | - |
+| `--sasl-username` | SASL username | - |
+| `--sasl-password` | SASL password | - |
+| `--ssl` | Enable SSL/TLS encryption | `false` |
+| `--ssl-cert` | Path to SSL client certificate file | - |
+| `--ssl-key` | Path to SSL client key file | - |
+| `--ssl-ca` | Path to SSL CA certificate file | - |
+| `--mutual-tls` | Enable mutual TLS authentication (requires client cert) | `false` |
 
 ## Security Rules Reference
 
@@ -157,6 +220,7 @@ The security analysis engine evaluates your Kafka cluster against the following 
 | ENC002 | Weak SSL Protocol | HIGH | Identifies deprecated or weak SSL/TLS protocols |
 | ENC003 | No SSL Client Authentication | MEDIUM | Flags missing SSL client authentication |
 | ENC004 | No Endpoint Identification | MEDIUM | Detects disabled SSL endpoint identification |
+| ENC005 | No Encryption at Rest | HIGH | Checks if log segment encryption is configured |
 
 ### Access Control (ACLs)
 
@@ -177,6 +241,13 @@ The security analysis engine evaluates your Kafka cluster against the following 
 | TOPIC003 | Low Min ISR | HIGH | Flags topics with insufficient minimum in-sync replicas |
 | TOPIC004 | Short Retention Period | MEDIUM | Detects unusually short message retention periods |
 | TOPIC005 | Delete Topic Enabled | MEDIUM | Identifies when topic deletion is enabled |
+| TOPIC006 | Short Message Retention Period | MEDIUM | Checks if topic retention periods are too short for compliance |
+
+### Data Protection
+
+| Rule ID | Name | Severity | Description |
+|---------|------|----------|-------------|
+| PHI001 | PHI Data Exposure Risk | HIGH | Checks if message sampling is enabled, which may expose protected health information |
 
 ### Security Score
 

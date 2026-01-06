@@ -235,6 +235,102 @@ func (r *DeleteTopicEnabledRule) Evaluate(ctx *AnalysisContext) []*Finding {
 	return findings
 }
 
+// ShortRetentionRule checks if topic retention period is too short for compliance.
+type ShortRetentionRule struct {
+	BaseRule
+}
+
+func (r *ShortRetentionRule) ID() string         { return "TOPIC006" }
+func (r *ShortRetentionRule) Name() string       { return "Short Message Retention Period" }
+func (r *ShortRetentionRule) Severity() Severity { return SeverityMedium }
+func (r *ShortRetentionRule) Category() Category { return CategoryConfiguration }
+
+func (r *ShortRetentionRule) Description() string {
+	return "Checks if topic message retention periods are set to short durations that may violate compliance requirements"
+}
+
+func (r *ShortRetentionRule) Evaluate(ctx *AnalysisContext) []*Finding {
+	if ctx.Configs == nil {
+		return nil
+	}
+
+	var findings []*Finding
+
+	// Minimum retention for compliance (6 years in milliseconds)
+	minRetentionMs := int64(6 * 365 * 24 * 60 * 60 * 1000) // approx 189216000000
+
+	for _, topic := range ctx.Configs.TopicConfigs {
+		retentionMsStr := getTopicConfigValue(topic.Configs, "retention.ms")
+		if retentionMsStr == "" || retentionMsStr == "<null>" {
+			// No retention set, infinite retention is fine
+			continue
+		}
+
+		retentionMs, err := strconv.ParseInt(retentionMsStr, 10, 64)
+		if err != nil {
+			continue
+		}
+
+		if retentionMs > 0 && retentionMs < minRetentionMs {
+			finding := NewFinding(r.ID(), r.Name(), r.Severity(), r.Category()).
+				WithDescription("Topic %s has retention.ms set to %d ms (~%.1f years), which may be too short for compliance requirements. "+
+					"Ensure retention policies meet legal and regulatory standards.", topic.TopicName, retentionMs, float64(retentionMs)/(365*24*60*60*1000)).
+				WithResource("topic", topic.TopicName).
+				WithValues(retentionMsStr, fmt.Sprintf(">=%d", minRetentionMs)).
+				WithRemediation("Review and adjust retention.ms to comply with data retention regulations. "+
+					"Consider setting to -1 for infinite retention if appropriate.").
+				WithReferences(
+					"https://kafka.apache.org/documentation/#topicconfigs_retention.ms",
+				)
+			findings = append(findings, finding)
+		}
+	}
+
+	return findings
+}
+
+// EncryptionAtRestRule checks if log segment encryption is enabled.
+type EncryptionAtRestRule struct {
+	BaseRule
+}
+
+func (r *EncryptionAtRestRule) ID() string         { return "ENC005" }
+func (r *EncryptionAtRestRule) Name() string       { return "No Encryption at Rest" }
+func (r *EncryptionAtRestRule) Severity() Severity { return SeverityHigh }
+func (r *EncryptionAtRestRule) Category() Category { return CategoryEncryption }
+
+func (r *EncryptionAtRestRule) Description() string {
+	return "Checks if log segment encryption is configured for data at rest protection"
+}
+
+func (r *EncryptionAtRestRule) Evaluate(ctx *AnalysisContext) []*Finding {
+	if ctx.Configs == nil {
+		return nil
+	}
+
+	var findings []*Finding
+
+	for _, broker := range ctx.Configs.BrokerConfigs {
+		encryptionEnabled := getConfigValue(broker.Configs, "log.segment.encryption")
+
+		if encryptionEnabled == "" || encryptionEnabled == "<null>" || encryptionEnabled == "false" {
+			finding := NewFinding(r.ID(), r.Name(), r.Severity(), r.Category()).
+				WithDescription("Broker %d does not have log segment encryption enabled. "+
+					"Data at rest is not encrypted, which may violate compliance requirements for sensitive data.", broker.BrokerID).
+				WithResource("broker", fmt.Sprintf("%d", broker.BrokerID)).
+				WithValues(encryptionEnabled, "true").
+				WithRemediation("Enable log segment encryption by setting 'log.segment.encryption=true' and configuring encryption keys. "+
+					"Note: This requires Confluent Platform or custom encryption implementation.").
+				WithReferences(
+					"https://docs.confluent.io/platform/current/security/encrypt-data-at-rest.html",
+				)
+			findings = append(findings, finding)
+		}
+	}
+
+	return findings
+}
+
 // getTopicConfigValue is a helper to retrieve a config value by name from topic configs.
 func getTopicConfigValue(configs []kafka.ConfigEntry, name string) string {
 	for _, cfg := range configs {

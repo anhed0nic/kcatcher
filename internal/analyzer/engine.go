@@ -18,6 +18,9 @@ type AnalysisContext struct {
 
 	// ACLs contains the access control list entries.
 	ACLs []kafka.ACLEntry
+
+	// SampleTopic indicates if message sampling is enabled.
+	SampleTopic string
 }
 
 // Rule defines the interface for security rules.
@@ -155,6 +158,7 @@ func DefaultEngine() *Engine {
 		&WeakSSLProtocolRule{},
 		&NoSSLClientAuthRule{},
 		&NoEndpointIdentificationRule{},
+		&EncryptionAtRestRule{},
 	)
 
 	// ACL rules
@@ -173,6 +177,11 @@ func DefaultEngine() *Engine {
 		&LowMinISRRule{},
 		&ShortRetentionRule{},
 		&DeleteTopicEnabledRule{},
+	)
+
+	// Data protection rules
+	engine.RegisterRules(
+		&PhiExposureRiskRule{},
 	)
 
 	return engine
