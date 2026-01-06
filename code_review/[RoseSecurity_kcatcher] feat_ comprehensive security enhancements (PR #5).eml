@@ -1,0 +1,1695 @@
+Delivered-To: anhed0nic.esq@gmail.com
+Received: by 2002:a05:6674:1395:b0:6a2:7e03:15c8 with SMTP id qw21csp1645400pxc;
+        Tue, 6 Jan 2026 13:20:43 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGiBBPGOJS3XJK6vN1ay2nvDIYIss9B03RG6GnYGzlxYh0Qod0jp1Q4D1FeLPCVIuFK6TMX
+X-Received: by 2002:a05:620a:4496:b0:8bb:7845:f46 with SMTP id af79cd13be357-8c3893a04a5mr35865085a.40.1767734443293;
+        Tue, 06 Jan 2026 13:20:43 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1767734443; cv=none;
+        d=google.com; s=arc-20240605;
+        b=ccJYz5k1RCttsi4130FVefFy8+Qfob/cVOQT0e9JRi3BHTJM9t9D/b+4C538eWCJ0P
+         i+4a7D1nyfah/0/HCypYvHijIs85wMJyIg6EZxgJO26miacbJv7yHWgfYFLLmHyvrfFV
+         OKDGte3/sNhNLcF784UHSzbECSijbAwbw0sBhQAhCLXWRwmiEhRjYrz1cSDc3qoJeFye
+         Ta7LJmoXzHRcfQHjTnPN+DVvpx4dMS7tnCw5iovsKKnE4nrKpvjrERzV/3jJC8RfqbEP
+         tZjKVrtDGdfwynAeFuegJyZX4Leae9Fi1MgbeblXlX7rvuxGrvVlU9FlX9l32WJ5OOFQ
+         AY5w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=destinations:list-unsubscribe-post:list-unsubscribe:list-post
+         :list-archive:list-id:precedence:content-transfer-encoding
+         :mime-version:subject:references:in-reply-to:message-id:cc:to
+         :reply-to:from:date:dkim-signature;
+        bh=PO15+HTyYea0Du7tOMbYl9cBuM3f4258eXniLV3tV/4=;
+        fh=Gz0tQz+c8rSdKffcI+/VLPnApS5RHNhbBdXfOJL/C4M=;
+        b=a1MLiN6wn82KF/Dr32E8cHWVHGySPk1MLlJu50Zg+9a5UTE8uaD66Ptk0Lj2RVkrG5
+         TpysyOaeiYX38FAq7y1at+/ZWw5df1Sdkz9jmJhEMRl9WsDIChHAsneTJahbPlWFDvEa
+         txlgmTz32ZhQHmGcti/k5gh1wDEj2SWhclpyUHehBrt+PiCOSMxNRmJ4qKw4jZ1N7pI5
+         FjlKcGhbR8lQAf/SeKJKOc/cyOaZzPIPbl0x0brl3s7xvK9X2M2WfEWscpZDrwyopotN
+         neWW7JnNuBk2mIHDAaf/iZ737mq4986/o7+22mLY8pLRKVUXg1vyTM4nLyqZFcl8DaXb
+         0qGg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@github.com header.s=pf2023 header.b=Z62NRZyf;
+       spf=pass (google.com: domain of noreply@github.com designates 192.30.252.209 as permitted sender) smtp.mailfrom=noreply@github.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=github.com
+Return-Path: <noreply@github.com>
+Received: from out-26.smtp.github.com (out-26.smtp.github.com. [192.30.252.209])
+        by mx.google.com with ESMTPS id af79cd13be357-8c37f52921esi343029885a.227.2026.01.06.13.20.43
+        for <anhed0nic.esq@gmail.com>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 06 Jan 2026 13:20:43 -0800 (PST)
+Received-SPF: pass (google.com: domain of noreply@github.com designates 192.30.252.209 as permitted sender) client-ip=192.30.252.209;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@github.com header.s=pf2023 header.b=Z62NRZyf;
+       spf=pass (google.com: domain of noreply@github.com designates 192.30.252.209 as permitted sender) smtp.mailfrom=noreply@github.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=github.com
+Received: from github.com (hubbernetes-node-0d4acea.ash1-iad.github.net [10.56.165.36])
+	by smtp.github.com (Postfix) with ESMTPA id EB0FC6009DB
+	for <anhed0nic.esq@gmail.com>; Tue,  6 Jan 2026 13:20:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=github.com;
+	s=pf2023; t=1767734442;
+	bh=PO15+HTyYea0Du7tOMbYl9cBuM3f4258eXniLV3tV/4=;
+	h=Date:From:Reply-To:To:Cc:In-Reply-To:References:Subject:List-ID:
+	 List-Archive:List-Post:List-Unsubscribe:List-Unsubscribe-Post:
+	 From;
+	b=Z62NRZyflkqL8+6T5+melADMyQPKskccO+HRQwNxRR6JeBWpD0CbnJ9cHx5sK8f3q
+	 qykMgMcaplst3x4PdObMUZst+prIPekATLUsLwIwV6I7L/M4kIVXN1RIz54dolZBWJ
+	 Mr2NuEYo7h5KiIVNcOw/cXow22H48WeYo7iHgqvs=
+Date: Tue, 06 Jan 2026 13:20:42 -0800
+From: Copilot <notifications@github.com>
+Reply-To: RoseSecurity/kcatcher <reply+BX4XZNPZGZ3H4W3GQSINYZDJ2QR2VEVBNHHODLNUUA@reply.github.com>
+To: RoseSecurity/kcatcher <kcatcher@noreply.github.com>
+Cc: anhed0nic <anhed0nic.esq@gmail.com>, 
+ Author <author@noreply.github.com>
+Message-ID: <RoseSecurity/kcatcher/pull/5/review/3632563097@github.com>
+In-Reply-To: <RoseSecurity/kcatcher/pull/5@github.com>
+References: <RoseSecurity/kcatcher/pull/5@github.com>
+Subject: Re: [RoseSecurity/kcatcher] feat: comprehensive security enhancements
+ (PR #5)
+Mime-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="--==_mimepart_695d7caae6eb7_cd10d0420018";
+ charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Precedence: list
+X-GitHub-Sender: Copilot
+X-GitHub-Recipient: anhed0nic
+X-GitHub-Reason: author
+List-ID: RoseSecurity/kcatcher <kcatcher.RoseSecurity.github.com>
+List-Archive: https://github.com/RoseSecurity/kcatcher
+List-Post: <mailto:reply+BX4XZNPZGZ3H4W3GQSINYZDJ2QR2VEVBNHHODLNUUA@reply.github.com>
+List-Unsubscribe: <mailto:unsub+BX4XZNPZGZ3H4W3GQSINYZDJ2QR2VEVBNHHODLNUUA@reply.github.com>,
+ <https://github.com/notifications/unsubscribe/one-click/BX4XZNMK2W7GRNDS2LOPCRT4FQRKVANCNFSM6AAAAACQ3XCLUE>
+List-Unsubscribe-Post: List-Unsubscribe=One-Click
+X-GitHub-Notify-Platform: newsies
+X-Auto-Response-Suppress: All
+destinations: anhed0nic.esq@gmail.com
+X-GitHub-Recipient-Address: anhed0nic.esq@gmail.com
+
+
+----==_mimepart_695d7caae6eb7_cd10d0420018
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+@Copilot commented on this pull request.
+
+## Pull request overview
+
+This pull request adds comprehensive security enhancements to the Kafka a=
+uditing tool, including authentication support (SASL/SSL), HIPAA complian=
+ce features with PHI masking, additional security rules, and new output f=
+ormats (CSV).
+
+**Key Changes:**
+- Added SASL and SSL/TLS authentication support for connecting to secured=
+ Kafka clusters
+- Implemented HIPAA compliance mode with automatic PHI data anonymization=
+ and audit logging
+- Added three new security rules: PHI exposure risk detection, message re=
+tention compliance checking, and encryption at rest verification
+
+### Reviewed changes
+
+Copilot reviewed 12 out of 12 changed files in this pull request and gene=
+rated 26 comments.
+
+<details>
+<summary>Show a summary per file</summary>
+
+| File | Description |
+| ---- | ----------- |
+| `internal/kafka/client.go` | Added authentication infrastructure with S=
+ASL and SSL/TLS configuration support |
+| `internal/kafka/sample.go` | Updated message sampling to use authentica=
+tion configuration |
+| `internal/config.go` | Added configuration fields for HIPAA mode, audit=
+ logging, benchmarking, and authentication |
+| `internal/brokers.go` | Implemented PHI anonymization, audit logging, H=
+IPAA warnings, and performance benchmarking |
+| `internal/brokers_test.go` | Added tests for PHI data anonymization pat=
+terns |
+| `internal/output/formatter.go` | Added CSV formatter for security analy=
+sis output |
+| `internal/analyzer/engine.go` | Added SampleTopic field to context and =
+registered new security rules |
+| `internal/analyzer/rules_topic.go` | Added retention period and encrypt=
+ion at rest compliance rules |
+| `internal/analyzer/rules_hipaa.go` | Added PHI exposure risk detection =
+rule |
+| `internal/analyzer/rules_test.go` | Added tests for PHI exposure and re=
+tention rules |
+| `cmd/root.go` | Added CLI flags for authentication, HIPAA mode, audit l=
+ogging, and benchmarking |
+| `README.md` | Updated documentation with authentication examples and ne=
+w feature descriptions |
+</details>
+
+
+
+
+
+
+---
+
+=F0=9F=92=A1 <a href=3D"/RoseSecurity/kcatcher/new/main/.github/instructi=
+ons?filename=3D*.instructions.md" class=3D"Link--inTextBlock" target=3D"_=
+blank" rel=3D"noopener noreferrer">Add Copilot custom instructions</a> fo=
+r smarter, more guided reviews. <a href=3D"https://docs.github.com/en/cop=
+ilot/customizing-copilot/adding-repository-custom-instructions-for-github=
+-copilot" class=3D"Link--inTextBlock" target=3D"_blank" rel=3D"noopener n=
+oreferrer">Learn how to get started</a>.
+
+> +	ssnRegex :=3D regexp.MustCompile(`\b\d{3}-\d{2}-\d{4}\b`)
++	text =3D ssnRegex.ReplaceAllString(text, "[SSN_REDACTED]")
++
++	// Mask phone numbers (simple pattern)
++	phoneRegex :=3D regexp.MustCompile(`\b\d{3}-\d{3}-\d{4}\b`)
++	text =3D phoneRegex.ReplaceAllString(text, "[PHONE_REDACTED]")
+
+The phone number regex pattern will incorrectly match SSN patterns since =
+both use the XXX-XX-XXXX format. The phoneRegex (XXX-XXX-XXXX) is applied=
+ after ssnRegex (XXX-XX-XXXX), but if you have a number like "123-456-789=
+0", it could be a phone number, whereas "123-45-6789" is an SSN. However,=
+ the issue is that both patterns will match strings with hyphens in simil=
+ar positions. Consider making the patterns more specific or checking for =
+word boundaries more carefully to avoid false positives.
+
+> +	// Mask dates of birth (DOB)
++	dobRegex :=3D regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
+
+The date of birth regex pattern is overly broad and will match any date-l=
+ike string, not just dates of birth. The pattern `\b\d{1,2}[/-]\d{1,2}[/-=
+]\d{2,4}\b` will match dates in messages that may not be DOBs (e.g., orde=
+r dates, timestamps, scheduling dates). This creates false positives and =
+may unnecessarily redact legitimate non-PHI dates. Consider either using =
+a more contextual approach or documenting that this pattern may be overly=
+ aggressive.
+```suggestion
+	// Mask dates of birth (DOB) using contextual patterns to avoid masking =
+all dates
+	dobRegex :=3D regexp.MustCompile(`(?i)\b(?:dob|d\.o\.b\.|date of birth)\=
+s*[:\-]?\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
+```
+
+> +func (r *ShortRetentionRule) Severity() Severity { return SeverityMedi=
+um }
++func (r *ShortRetentionRule) Category() Category { return CategoryConfig=
+uration }
++
++func (r *ShortRetentionRule) Description() string {
++	return "Checks if topic message retention periods are set to short dura=
+tions that may violate compliance requirements"
++}
++
++func (r *ShortRetentionRule) Evaluate(ctx *AnalysisContext) []*Finding {=
+
++	if ctx.Configs =3D=3D nil {
++		return nil
++	}
++
++	var findings []*Finding
++
++	// Minimum retention for compliance (6 years in milliseconds)
++	minRetentionMs :=3D int64(6 * 365 * 24 * 60 * 60 * 1000) // approx 1892=
+16000000
+
+The variable name "minRetentionMs" is misleading since this represents a =
+maximum threshold for flagging short retention periods. The logic checks =
+if retention is less than this value, making it a minimum acceptable rete=
+ntion, but the variable name suggests it's the minimum retention found. C=
+onsider renaming to "minAcceptableRetentionMs" or "complianceRetentionThr=
+esholdMs" for clarity.
+
+> @@ -18,6 +18,9 @@ type AnalysisContext struct {
+ =
+
+ 	// ACLs contains the access control list entries.
+ 	ACLs []kafka.ACLEntry
++
++	// SampleTopic indicates if message sampling is enabled.
+
+The SampleTopic field is added to AnalysisContext but is not documented. =
+Consider adding a comment explaining what this field represents and why i=
+t's needed for the PHI exposure risk rule.
+```suggestion
+	// SampleTopic is the name of a Kafka topic whose messages may be sample=
+d
+	// for content inspection. It is used by rules such as the PHI exposure =
+risk
+	// rule to analyze real message payloads for sensitive data when assessi=
+ng
+	// the cluster's exposure risk.
+```
+
+> +// anonymizeData masks potential PHI in the given text.
++func anonymizeData(text string) string {
++	// Mask email addresses
++	emailRegex :=3D regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[=
+a-zA-Z]{2,}`)
++	text =3D emailRegex.ReplaceAllString(text, "[EMAIL_REDACTED]")
++
++	// Mask potential SSN (XXX-XX-XXXX)
++	ssnRegex :=3D regexp.MustCompile(`\b\d{3}-\d{2}-\d{4}\b`)
++	text =3D ssnRegex.ReplaceAllString(text, "[SSN_REDACTED]")
++
++	// Mask phone numbers (simple pattern)
++	phoneRegex :=3D regexp.MustCompile(`\b\d{3}-\d{3}-\d{4}\b`)
++	text =3D phoneRegex.ReplaceAllString(text, "[PHONE_REDACTED]")
++
++	// Mask credit card numbers (simple 16-digit)
++	ccRegex :=3D regexp.MustCompile(`\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{=
+4}\b`)
++	text =3D ccRegex.ReplaceAllString(text, "[CC_REDACTED]")
++
++	// Mask medical record numbers (MRN) - common patterns
++	mrnRegex :=3D regexp.MustCompile(`\bMRN[:\s]*[A-Z0-9]{6,12}\b`)
++	text =3D mrnRegex.ReplaceAllString(text, "[MRN_REDACTED]")
++
++	// Mask ICD codes
++	icdRegex :=3D regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
++	text =3D icdRegex.ReplaceAllString(text, "[ICD_REDACTED]")
++
++	// Mask dates of birth (DOB)
++	dobRegex :=3D regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
++	text =3D dobRegex.ReplaceAllString(text, "[DOB_REDACTED]")
++
++	return text
++}
+
+The anonymizeData function is called for every message key and value when=
+ HIPAA mode is enabled, and it compiles and executes seven different rege=
+x patterns on each string. Since regex compilation is expensive, these pa=
+tterns should be pre-compiled as package-level variables (using regexp.Mu=
+stCompile at init time) rather than being compiled on every function call=
+. This will significantly improve performance when processing large numbe=
+rs of sampled messages.
+
+> +		if auth.SSLCertFile !=3D "" && auth.SSLKeyFile !=3D "" {
++			cert, err :=3D tls.LoadX509KeyPair(auth.SSLCertFile, auth.SSLKeyFile)=
+
++			if err !=3D nil {
++				// Handle error? For now, ignore or log
++			} else {
++				tlsConfig.Certificates =3D []tls.Certificate{cert}
++			}
++		}
+
+There is no validation that SSL certificate and key files exist and are r=
+eadable before attempting to load them. If the files don't exist or have =
+incorrect permissions, the error is silently ignored due to the error han=
+dling issue mentioned elsewhere. Even if errors were properly handled, it=
+ would be better to fail fast with a clear error message before attemptin=
+g the connection.
+
+> +	if auth !=3D nil && auth.SASLMechanism !=3D "" {
++		// For now, assume SCRAM or PLAIN
++		// This is simplified; in real implementation, handle different mechan=
+isms
++		opts =3D append(opts, kgo.SASL(kgo.SASLType(auth.SASLMechanism), auth.=
+SASLUsername, auth.SASLPassword))
++	}
+
+The SASL authentication implementation uses a simplified approach with kg=
+o.SASLType that may not work correctly. The franz-go library requires spe=
+cific SASL mechanism constructors like scram.Auth() for SCRAM mechanisms =
+or plain.Auth() for PLAIN. Simply casting the mechanism name string to SA=
+SLType is incorrect and will likely cause authentication failures.
+
+> +	icdRegex :=3D regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
++	text =3D icdRegex.ReplaceAllString(text, "[ICD_REDACTED]")
++
++	// Mask dates of birth (DOB)
++	dobRegex :=3D regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
++	text =3D dobRegex.ReplaceAllString(text, "[DOB_REDACTED]")
++
++	return text
++}
++
++// logAudit logs an audit event to the specified file if configured.
++func logAudit(message string) {
++	if Cfg.AuditLogFile =3D=3D "" {
++		return
++	}
++	file, err :=3D os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os=
+.O_WRONLY, 0644)
+
+The audit log file is opened with world-readable permissions (0644). For =
+a security audit log that may contain sensitive information about Kafka o=
+perations, access attempts, and configurations, this is too permissive. T=
+he file should be created with more restrictive permissions like 0600 to =
+ensure only the owner can read it.
+```suggestion
+	file, err :=3D os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os.=
+O_WRONLY, 0600)
+```
+
+> +	// Minimum retention for compliance (6 years in milliseconds)
++	minRetentionMs :=3D int64(6 * 365 * 24 * 60 * 60 * 1000) // approx 1892=
+16000000
+
+The minimum retention period calculation has an error in the comment. The=
+ calculation `6 * 365 * 24 * 60 * 60 * 1000` equals approximately 189,216=
+,000,000 milliseconds (6 years), but the comment says "approx 18921600000=
+0" without commas, which could be misleading. More importantly, the requi=
+rement of a 6-year minimum retention period seems arbitrary and may not a=
+lign with actual compliance requirements, which vary by regulation (e.g.,=
+ HIPAA typically requires 6 years, but other regulations differ). This sh=
+ould be configurable rather than hardcoded.
+
+> +		encryptionEnabled :=3D getConfigValue(broker.Configs, "log.segment.e=
+ncryption")
++
++		if encryptionEnabled =3D=3D "" || encryptionEnabled =3D=3D "<null>" ||=
+ encryptionEnabled =3D=3D "false" {
++			finding :=3D NewFinding(r.ID(), r.Name(), r.Severity(), r.Category())=
+.
++				WithDescription("Broker %d does not have log segment encryption enab=
+led. "+
++					"Data at rest is not encrypted, which may violate compliance requir=
+ements for sensitive data.", broker.BrokerID).
++				WithResource("broker", fmt.Sprintf("%d", broker.BrokerID)).
++				WithValues(encryptionEnabled, "true").
++				WithRemediation("Enable log segment encryption by setting 'log.segme=
+nt.encryption=3Dtrue' and configuring encryption keys. "+
++					"Note: This requires Confluent Platform or custom encryption implem=
+entation.").
++				WithReferences(
++					"https://docs.confluent.io/platform/current/security/encrypt-data-a=
+t-rest.html",
++				)
++			findings =3D append(findings, finding)
+
+The encryption at rest check is looking for a configuration property "log=
+.segment.encryption" that doesn't exist in Apache Kafka. Apache Kafka doe=
+s not have built-in encryption at rest; this is a feature provided by Con=
+fluent Platform or requires custom implementation at the storage layer. T=
+he rule will always flag all brokers as non-compliant for standard Apache=
+ Kafka installations, even when encryption at rest is properly implemente=
+d through filesystem-level encryption or cloud provider encryption. This =
+check should either be removed, made conditional based on the Kafka distr=
+ibution, or check for different indicators of encryption at rest.
+
+>  		}
+ =
+
+ 		engine :=3D analyzer.DefaultEngine()
+ 		result :=3D engine.Analyze(analysisCtx)
+ 		data.Analysis =3D convertAnalysisResult(result)
++		logAudit(fmt.Sprintf("Performed security analysis: %d findings", len(r=
+esult.Findings)))
++	}
++
++	analysisTime =3D time.Since(startTime)
++
++	// Print benchmark results if enabled
++	if Cfg.Benchmark {
++		fmt.Printf("\nPerformance Benchmark:\n")
++		fmt.Printf("  Connection Time: %v\n", connectionTime)
++		fmt.Printf("  Metadata Retrieval: %v\n", metadataTime)
++		fmt.Printf("  Config Retrieval: %v\n", configTime)
++		fmt.Printf("  ACL Retrieval: %v\n", aclTime)
++		fmt.Printf("  Message Sampling: %v\n", sampleTime)
++		fmt.Printf("  Security Analysis: %v\n", analysisTime)
++		fmt.Printf("  Total Time: %v\n", connectionTime+metadataTime+configTim=
+e+aclTime+sampleTime+analysisTime)
+
+The benchmark timing for "Total Time" is calculated by summing individual=
+ operation times, but this doesn't account for the time spent in other op=
+erations not being measured (e.g., data conversion, output formatting, et=
+c.). The total time should be measured from the very beginning of the fun=
+ction to the point before output to be accurate.
+
+> +		if auth.SSLCertFile !=3D "" && auth.SSLKeyFile !=3D "" {
++			cert, err :=3D tls.LoadX509KeyPair(auth.SSLCertFile, auth.SSLKeyFile)=
+
++			if err !=3D nil {
++				// Handle error? For now, ignore or log
++			} else {
++				tlsConfig.Certificates =3D []tls.Certificate{cert}
++			}
++		}
++		if auth.SSLCAFile !=3D "" {
++			caCert, err :=3D os.ReadFile(auth.SSLCAFile)
++			if err !=3D nil {
++				// Handle error
++			} else {
++				caCertPool :=3D x509.NewCertPool()
++				caCertPool.AppendCertsFromPEM(caCert)
++				tlsConfig.RootCAs =3D caCertPool
++			}
++		}
+
+Errors from loading TLS certificates and CA files are silently ignored. I=
+f certificate loading fails, the client will proceed with incomplete TLS =
+configuration, which could lead to connection failures or security issues=
+. These errors should be propagated to the caller so they can be properly=
+ handled.
+
+> +		if auth.MutualTLS {
++			tlsConfig.ClientAuth =3D tls.RequireAndVerifyClientCert
++		}
+
+The ClientAuth field is set incorrectly. This field should be set on the =
+server side, not the client side. For mutual TLS on the client, the clien=
+t only needs to provide its certificate in the Certificates field, which =
+is already done above. Setting ClientAuth to RequireAndVerifyClientCert o=
+n the client has no effect and shows a misunderstanding of TLS configurat=
+ion.
+```suggestion
+
+```
+
+> +		// Escape commas and quotes in fields
++		description :=3D strings.ReplaceAll(finding.Description, ",", ";")
++		description =3D strings.ReplaceAll(description, "\"", "\"\"")
++		remediation :=3D strings.ReplaceAll(finding.Remediation, ",", ";")
++		remediation =3D strings.ReplaceAll(remediation, "\"", "\"\"")
+
+The CSV escaping logic is incomplete. Simply replacing commas with semico=
+lons and double quotes with doubled quotes doesn't properly handle all CS=
+V edge cases. For instance, if a field contains newlines, they should als=
+o be properly escaped, and fields should only be quoted when necessary or=
+ always quoted for consistency. Consider using the standard encoding/csv =
+package writer instead of manual escaping to ensure proper CSV formatting=
+.
+
+> +	// Mask medical record numbers (MRN) - common patterns
++	mrnRegex :=3D regexp.MustCompile(`\bMRN[:\s]*[A-Z0-9]{6,12}\b`)
+
+The MRN (Medical Record Number) regex pattern requires the literal text "=
+MRN" before the identifier, which will miss MRNs that appear without this=
+ prefix or use different labeling (e.g., "Medical Record: 123456", "Recor=
+d #ABC123456"). This makes the anonymization incomplete and could result =
+in PHI exposure. Consider broadening the pattern or using multiple patter=
+ns to catch common MRN formats.
+```suggestion
+	// Mask medical record numbers (MRN) - common patterns and labels
+	mrnRegex :=3D regexp.MustCompile(`(?i)\b(?:MRN|Medical\s*Record|Med(?:ic=
+al)?\s*Rec(?:ord)?|Record\s*#?)[:\s-]*[A-Z0-9]{6,12}\b`)
+```
+
+> +	// Create auth config
++	auth :=3D &kafka.AuthConfig{
++		SASLMechanism: Cfg.SASLMechanism,
++		SASLUsername:  Cfg.SASLUsername,
++		SASLPassword:  Cfg.SASLPassword,
++		SSLEnabled:    Cfg.SSLEnabled,
++		SSLCertFile:   Cfg.SSLCertFile,
++		SSLKeyFile:    Cfg.SSLKeyFile,
++		SSLCAFile:     Cfg.SSLCAFile,
++		MutualTLS:     Cfg.MutualTLS,
++	}
+
+The function creates an AuthConfig struct with all the SASL and SSL confi=
+guration, but when the configuration is empty (all fields are empty strin=
+gs or false), it still passes this auth object to the client. While this =
+may not cause immediate errors, it's cleaner to pass nil when no authenti=
+cation is configured, which would also make the buildClientOpts function =
+simpler by checking if auth is nil.
+
+> +	if auth !=3D nil && auth.SASLMechanism !=3D "" {
++		// For now, assume SCRAM or PLAIN
++		// This is simplified; in real implementation, handle different mechan=
+isms
++		opts =3D append(opts, kgo.SASL(kgo.SASLType(auth.SASLMechanism), auth.=
+SASLUsername, auth.SASLPassword))
++	}
+
+There is no validation of the SASL credentials before they are used. If a=
+ user provides a SASL mechanism but forgets to provide username or passwo=
+rd, the code will attempt to connect with empty credentials, which will f=
+ail. Consider adding validation to check that if SASLMechanism is set, bo=
+th SASLUsername and SASLPassword are also provided, and provide a clear e=
+rror message to the user.
+
+> +	// Mask ICD codes
++	icdRegex :=3D regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
+
+The ICD code regex pattern is too broad and will match many non-ICD codes=
+. The pattern `\b[A-Z]\d{2}(?:\.\d{1,3})?\b` will match any single letter=
+ followed by two digits, which could include legitimate codes, abbreviati=
+ons, or identifiers that aren't ICD codes (e.g., "A12.5" could be a produ=
+ct code). This will result in false positives where non-PHI data is unnec=
+essarily redacted.
+```suggestion
+	// Mask ICD codes (require an explicit ICD prefix to reduce false positi=
+ves)
+	icdRegex :=3D regexp.MustCompile(`\b(?:ICD-10-CM|ICD-10|ICD10|ICD-9-CM|I=
+CD-9|ICD9)\s+[A-TV-Z]\d{2}(?:\.[0-9A-TV-Z]{1,4})?\b`)
+```
+
+> +		kgo.DialTimeout(timeout),
++		kgo.RequestTimeoutOverhead(timeout),
++	}
++
+
+When timeout is 0 (which happens in the SampleMessages function), the Dia=
+lTimeout and RequestTimeoutOverhead options are set to 0. This will cause=
+ immediate timeout failures on connection attempts. The buildClientOpts f=
+unction should handle the case where timeout is 0 by either using a defau=
+lt timeout or omitting these options when sampling to inherit the default=
+ timeout from the original client creation.
+```suggestion
+	}
+
+	// Only override timeouts when a positive timeout is provided.
+	// When timeout is 0, we omit these options to inherit franz-go defaults=
+.
+	if timeout > 0 {
+		opts =3D append(opts,
+			kgo.DialTimeout(timeout),
+			kgo.RequestTimeoutOverhead(timeout),
+		)
+	}
+```
+
+> +// logAudit logs an audit event to the specified file if configured.
++func logAudit(message string) {
++	if Cfg.AuditLogFile =3D=3D "" {
++		return
++	}
++	file, err :=3D os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os=
+.O_WRONLY, 0644)
++	if err !=3D nil {
++		fmt.Fprintf(os.Stderr, "Failed to open audit log: %v\n", err)
++		return
++	}
++	defer file.Close()
++	timestamp :=3D time.Now().Format(time.RFC3339)
++	logEntry :=3D fmt.Sprintf("[%s] %s\n", timestamp, message)
++	file.WriteString(logEntry)
++}
+
+The logAudit function lacks test coverage. Given that audit logging is a =
+critical security feature for compliance tracking, it should have tests t=
+o verify that audit entries are written correctly with proper timestamps,=
+ error handling works as expected, and file creation/permissions are corr=
+ect.
+
+> +// CSVFormatter outputs analysis results in CSV format.
++type CSVFormatter struct {
++	writer io.Writer
++}
++
++// Format outputs the data in CSV format (primarily for analysis results=
+).
++func (f *CSVFormatter) Format(data *OutputData) error {
++	if data.Analysis =3D=3D nil {
++		fmt.Fprintf(f.writer, "No analysis data available\n")
++		return nil
++	}
++
++	// CSV header
++	fmt.Fprintf(f.writer, "Rule ID,Title,Severity,Category,Resource,Resourc=
+e Type,Current Value,Expected Value,Description,Remediation\n")
++
++	// CSV rows
++	for _, finding :=3D range data.Analysis.Findings {
++		// Escape commas and quotes in fields
++		description :=3D strings.ReplaceAll(finding.Description, ",", ";")
++		description =3D strings.ReplaceAll(description, "\"", "\"\"")
++		remediation :=3D strings.ReplaceAll(finding.Remediation, ",", ";")
++		remediation =3D strings.ReplaceAll(remediation, "\"", "\"\"")
++
++		fmt.Fprintf(f.writer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\=
+",\"%s\",\"%s\",\"%s\"\n",
++			finding.RuleID,
++			finding.Title,
++			finding.Severity,
++			finding.Category,
++			finding.Resource,
++			finding.ResourceType,
++			finding.CurrentValue,
++			finding.ExpectedValue,
++			description,
++			remediation,
++		)
++	}
++
++	return nil
++}
+
+The CSVFormatter lacks test coverage. There are no tests to verify CSV es=
+caping works correctly, headers are formatted properly, or that edge case=
+s (empty fields, special characters, newlines) are handled. Given that CS=
+V output is a new feature for security analysis reporting, it should have=
+ comprehensive tests.
+
+> +// buildClientOpts builds kgo client options from config.
++func buildClientOpts(brokers []string, timeout time.Duration, auth *Auth=
+Config) []kgo.Opt {
++	opts :=3D []kgo.Opt{
++		kgo.SeedBrokers(brokers...),
++		kgo.DialTimeout(timeout),
++		kgo.RequestTimeoutOverhead(timeout),
++	}
++
++	// Add SASL authentication if configured
++	if auth !=3D nil && auth.SASLMechanism !=3D "" {
++		// For now, assume SCRAM or PLAIN
++		// This is simplified; in real implementation, handle different mechan=
+isms
++		opts =3D append(opts, kgo.SASL(kgo.SASLType(auth.SASLMechanism), auth.=
+SASLUsername, auth.SASLPassword))
++	}
++
++	// Add SSL/TLS if enabled
++	if auth !=3D nil && auth.SSLEnabled {
++		tlsConfig :=3D &tls.Config{}
++		if auth.SSLCertFile !=3D "" && auth.SSLKeyFile !=3D "" {
++			cert, err :=3D tls.LoadX509KeyPair(auth.SSLCertFile, auth.SSLKeyFile)=
+
++			if err !=3D nil {
++				// Handle error? For now, ignore or log
++			} else {
++				tlsConfig.Certificates =3D []tls.Certificate{cert}
++			}
++		}
++		if auth.SSLCAFile !=3D "" {
++			caCert, err :=3D os.ReadFile(auth.SSLCAFile)
++			if err !=3D nil {
++				// Handle error
++			} else {
++				caCertPool :=3D x509.NewCertPool()
++				caCertPool.AppendCertsFromPEM(caCert)
++				tlsConfig.RootCAs =3D caCertPool
++			}
++		}
++		if auth.MutualTLS {
++			tlsConfig.ClientAuth =3D tls.RequireAndVerifyClientCert
++		}
++		opts =3D append(opts, kgo.DialTLSConfig(tlsConfig))
++	}
++
++	return opts
++}
+
+The authentication configuration handling in buildClientOpts lacks test c=
+overage. Since authentication is critical for secure connections to produ=
+ction Kafka clusters, there should be tests verifying that SASL and SSL/T=
+LS options are correctly constructed, certificate loading works, and erro=
+r cases are handled properly.
+
+> +// EncryptionAtRestRule checks if log segment encryption is enabled.
++type EncryptionAtRestRule struct {
++	BaseRule
++}
++
++func (r *EncryptionAtRestRule) ID() string         { return "ENC005" }
++func (r *EncryptionAtRestRule) Name() string       { return "No Encrypti=
+on at Rest" }
++func (r *EncryptionAtRestRule) Severity() Severity { return SeverityHigh=
+ }
++func (r *EncryptionAtRestRule) Category() Category { return CategoryEncr=
+yption }
++
++func (r *EncryptionAtRestRule) Description() string {
++	return "Checks if log segment encryption is configured for data at rest=
+ protection"
++}
++
++func (r *EncryptionAtRestRule) Evaluate(ctx *AnalysisContext) []*Finding=
+ {
++	if ctx.Configs =3D=3D nil {
++		return nil
++	}
++
++	var findings []*Finding
++
++	for _, broker :=3D range ctx.Configs.BrokerConfigs {
++		encryptionEnabled :=3D getConfigValue(broker.Configs, "log.segment.enc=
+ryption")
++
++		if encryptionEnabled =3D=3D "" || encryptionEnabled =3D=3D "<null>" ||=
+ encryptionEnabled =3D=3D "false" {
++			finding :=3D NewFinding(r.ID(), r.Name(), r.Severity(), r.Category())=
+.
++				WithDescription("Broker %d does not have log segment encryption enab=
+led. "+
++					"Data at rest is not encrypted, which may violate compliance requir=
+ements for sensitive data.", broker.BrokerID).
++				WithResource("broker", fmt.Sprintf("%d", broker.BrokerID)).
++				WithValues(encryptionEnabled, "true").
++				WithRemediation("Enable log segment encryption by setting 'log.segme=
+nt.encryption=3Dtrue' and configuring encryption keys. "+
++					"Note: This requires Confluent Platform or custom encryption implem=
+entation.").
++				WithReferences(
++					"https://docs.confluent.io/platform/current/security/encrypt-data-a=
+t-rest.html",
++				)
++			findings =3D append(findings, finding)
++		}
++	}
++
++	return findings
++}
+
+The EncryptionAtRestRule lacks test coverage. While there is a test for S=
+hortRetentionRule, there's no corresponding test for the encryption at re=
+st rule. Given that this is a security rule with HIGH severity, it should=
+ have tests to verify it correctly identifies when encryption is disabled=
+ or the configuration is missing.
+
+> +	defer file.Close()
++	timestamp :=3D time.Now().Format(time.RFC3339)
++	logEntry :=3D fmt.Sprintf("[%s] %s\n", timestamp, message)
++	file.WriteString(logEntry)
+
+File handle may be writable as a result of data flow from a [call to Open=
+File](1) and closing it may result in data loss upon failure, which is no=
+t handled explicitly.
+```suggestion
+	defer func() {
+		if err :=3D file.Close(); err !=3D nil {
+			fmt.Fprintf(os.Stderr, "Failed to close audit log: %v\n", err)
+		}
+	}()
+	timestamp :=3D time.Now().Format(time.RFC3339)
+	logEntry :=3D fmt.Sprintf("[%s] %s\n", timestamp, message)
+	if _, err :=3D file.WriteString(logEntry); err !=3D nil {
+		fmt.Fprintf(os.Stderr, "Failed to write to audit log: %v\n", err)
+	}
+```
+
+-- =
+
+Reply to this email directly or view it on GitHub:
+https://github.com/RoseSecurity/kcatcher/pull/5#pullrequestreview-3632563=
+097
+You are receiving this because you authored the thread.
+
+Message ID: <RoseSecurity/kcatcher/pull/5/review/3632563097@github.com>=
+
+----==_mimepart_695d7caae6eb7_cd10d0420018
+Content-Type: text/html;
+ charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<p></p>
+<p><b>@Copilot</b> commented on this pull request.</p>
+
+<h2 dir=3D"auto">Pull request overview</h2>
+<p dir=3D"auto">This pull request adds comprehensive security enhancement=
+s to the Kafka auditing tool, including authentication support (SASL/SSL)=
+, HIPAA compliance features with PHI masking, additional security rules, =
+and new output formats (CSV).</p>
+<p dir=3D"auto"><strong>Key Changes:</strong></p>
+<ul dir=3D"auto">
+<li>Added SASL and SSL/TLS authentication support for connecting to secur=
+ed Kafka clusters</li>
+<li>Implemented HIPAA compliance mode with automatic PHI data anonymizati=
+on and audit logging</li>
+<li>Added three new security rules: PHI exposure risk detection, message =
+retention compliance checking, and encryption at rest verification</li>
+</ul>
+<h3 dir=3D"auto">Reviewed changes</h3>
+<p dir=3D"auto">Copilot reviewed 12 out of 12 changed files in this pull =
+request and generated 26 comments.</p>
+<details>
+<summary>Show a summary per file</summary>
+<markdown-accessiblity-table><table role=3D"table">
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class=3D"notranslate">internal/kafka/client.go</code></td>
+<td>Added authentication infrastructure with SASL and SSL/TLS configurati=
+on support</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/kafka/sample.go</code></td>
+<td>Updated message sampling to use authentication configuration</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/config.go</code></td>
+<td>Added configuration fields for HIPAA mode, audit logging, benchmarkin=
+g, and authentication</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/brokers.go</code></td>
+<td>Implemented PHI anonymization, audit logging, HIPAA warnings, and per=
+formance benchmarking</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/brokers_test.go</code></td>
+<td>Added tests for PHI data anonymization patterns</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/output/formatter.go</code></td>
+<td>Added CSV formatter for security analysis output</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/analyzer/engine.go</code></td>
+<td>Added SampleTopic field to context and registered new security rules<=
+/td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/analyzer/rules_topic.go</code></=
+td>
+<td>Added retention period and encryption at rest compliance rules</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/analyzer/rules_hipaa.go</code></=
+td>
+<td>Added PHI exposure risk detection rule</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">internal/analyzer/rules_test.go</code></t=
+d>
+<td>Added tests for PHI exposure and retention rules</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">cmd/root.go</code></td>
+<td>Added CLI flags for authentication, HIPAA mode, audit logging, and be=
+nchmarking</td>
+</tr>
+<tr>
+<td><code class=3D"notranslate">README.md</code></td>
+<td>Updated documentation with authentication examples and new feature de=
+scriptions</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+</details>
+<hr>
+<p dir=3D"auto">=F0=9F=92=A1 <a href=3D"/RoseSecurity/kcatcher/new/main/.=
+github/instructions?filename=3D*.instructions.md">Add Copilot custom inst=
+ructions</a> for smarter, more guided reviews. <a href=3D"https://docs.gi=
+thub.com/en/copilot/customizing-copilot/adding-repository-custom-instruct=
+ions-for-github-copilot">Learn how to get started</a>.</p><hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334741">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	ssnRegex :=3D regexp.MustCompile(`\b\d{3=
+}-\d{2}-\d{4}\b`)
++	text =3D ssnRegex.ReplaceAllString(text, &quot;[SSN_REDACTED]&quot;)
++
++	// Mask phone numbers (simple pattern)
++	phoneRegex :=3D regexp.MustCompile(`\b\d{3}-\d{3}-\d{4}\b`)
++	text =3D phoneRegex.ReplaceAllString(text, &quot;[PHONE_REDACTED]&quot;=
+)
+</pre>
+<p dir=3D"auto">The phone number regex pattern will incorrectly match SSN=
+ patterns since both use the XXX-XX-XXXX format. The phoneRegex (XXX-XXX-=
+XXXX) is applied after ssnRegex (XXX-XX-XXXX), but if you have a number l=
+ike "123-456-7890", it could be a phone number, whereas "123-45-6789" is =
+an SSN. However, the issue is that both patterns will match strings with =
+hyphens in similar positions. Consider making the patterns more specific =
+or checking for word boundaries more carefully to avoid false positives.<=
+/p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334752">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	// Mask dates of birth (DOB)
++	dobRegex :=3D regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
+</pre>
+<p dir=3D"auto">The date of birth regex pattern is overly broad and will =
+match any date-like string, not just dates of birth. The pattern <code cl=
+ass=3D"notranslate">\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b</code> will match d=
+ates in messages that may not be DOBs (e.g., order dates, timestamps, sch=
+eduling dates). This creates false positives and may unnecessarily redact=
+ legitimate non-PHI dates. Consider either using a more contextual approa=
+ch or documenting that this pattern may be overly aggressive.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-	// Mask dates of birth (DOB)
+-	dobRegex :=3D regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
++	// Mask dates of birth (DOB) using contextual patterns to avoid masking=
+ all dates
++	dobRegex :=3D regexp.MustCompile(`(?i)\b(?:dob|d\.o\.b\.|date of birth)=
+\s*[:\-]?\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
+</pre>
+
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334771">internal/analyzer/rules_topic.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +func (r *ShortRetentionRule) Severity() S=
+everity { return SeverityMedium }
++func (r *ShortRetentionRule) Category() Category { return CategoryConfig=
+uration }
++
++func (r *ShortRetentionRule) Description() string {
++	return &quot;Checks if topic message retention periods are set to short=
+ durations that may violate compliance requirements&quot;
++}
++
++func (r *ShortRetentionRule) Evaluate(ctx *AnalysisContext) []*Finding {=
+
++	if ctx.Configs =3D=3D nil {
++		return nil
++	}
++
++	var findings []*Finding
++
++	// Minimum retention for compliance (6 years in milliseconds)
++	minRetentionMs :=3D int64(6 * 365 * 24 * 60 * 60 * 1000) // approx 1892=
+16000000
+</pre>
+<p dir=3D"auto">The variable name "minRetentionMs" is misleading since th=
+is represents a maximum threshold for flagging short retention periods. T=
+he logic checks if retention is less than this value, making it a minimum=
+ acceptable retention, but the variable name suggests it's the minimum re=
+tention found. Consider renaming to "minAcceptableRetentionMs" or "compli=
+anceRetentionThresholdMs" for clarity.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334784">internal/analyzer/engine.go</a>:</p>
+<pre style=3D'color:#555'>&gt; @@ -18,6 +18,9 @@ type AnalysisContext str=
+uct {
+ =
+
+ 	// ACLs contains the access control list entries.
+ 	ACLs []kafka.ACLEntry
++
++	// SampleTopic indicates if message sampling is enabled.
+</pre>
+<p dir=3D"auto">The SampleTopic field is added to AnalysisContext but is =
+not documented. Consider adding a comment explaining what this field repr=
+esents and why it's needed for the PHI exposure risk rule.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-	// SampleTopic indicates if message sampling=
+ is enabled.
++	// SampleTopic is the name of a Kafka topic whose messages may be sampl=
+ed
++	// for content inspection. It is used by rules such as the PHI exposure=
+ risk
++	// rule to analyze real message payloads for sensitive data when assess=
+ing
++	// the cluster's exposure risk.
+</pre>
+
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334794">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +// anonymizeData masks potential PHI in t=
+he given text.
++func anonymizeData(text string) string {
++	// Mask email addresses
++	emailRegex :=3D regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[=
+a-zA-Z]{2,}`)
++	text =3D emailRegex.ReplaceAllString(text, &quot;[EMAIL_REDACTED]&quot;=
+)
++
++	// Mask potential SSN (XXX-XX-XXXX)
++	ssnRegex :=3D regexp.MustCompile(`\b\d{3}-\d{2}-\d{4}\b`)
++	text =3D ssnRegex.ReplaceAllString(text, &quot;[SSN_REDACTED]&quot;)
++
++	// Mask phone numbers (simple pattern)
++	phoneRegex :=3D regexp.MustCompile(`\b\d{3}-\d{3}-\d{4}\b`)
++	text =3D phoneRegex.ReplaceAllString(text, &quot;[PHONE_REDACTED]&quot;=
+)
++
++	// Mask credit card numbers (simple 16-digit)
++	ccRegex :=3D regexp.MustCompile(`\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{=
+4}\b`)
++	text =3D ccRegex.ReplaceAllString(text, &quot;[CC_REDACTED]&quot;)
++
++	// Mask medical record numbers (MRN) - common patterns
++	mrnRegex :=3D regexp.MustCompile(`\bMRN[:\s]*[A-Z0-9]{6,12}\b`)
++	text =3D mrnRegex.ReplaceAllString(text, &quot;[MRN_REDACTED]&quot;)
++
++	// Mask ICD codes
++	icdRegex :=3D regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
++	text =3D icdRegex.ReplaceAllString(text, &quot;[ICD_REDACTED]&quot;)
++
++	// Mask dates of birth (DOB)
++	dobRegex :=3D regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
++	text =3D dobRegex.ReplaceAllString(text, &quot;[DOB_REDACTED]&quot;)
++
++	return text
++}
+</pre>
+<p dir=3D"auto">The anonymizeData function is called for every message ke=
+y and value when HIPAA mode is enabled, and it compiles and executes seve=
+n different regex patterns on each string. Since regex compilation is exp=
+ensive, these patterns should be pre-compiled as package-level variables =
+(using regexp.MustCompile at init time) rather than being compiled on eve=
+ry function call. This will significantly improve performance when proces=
+sing large numbers of sampled messages.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334805">internal/kafka/client.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +		if auth.SSLCertFile !=3D &quot;&quot; &=
+amp;&amp; auth.SSLKeyFile !=3D &quot;&quot; {
++			cert, err :=3D tls.LoadX509KeyPair(auth.SSLCertFile, auth.SSLKeyFile)=
+
++			if err !=3D nil {
++				// Handle error? For now, ignore or log
++			} else {
++				tlsConfig.Certificates =3D []tls.Certificate{cert}
++			}
++		}
+</pre>
+<p dir=3D"auto">There is no validation that SSL certificate and key files=
+ exist and are readable before attempting to load them. If the files don'=
+t exist or have incorrect permissions, the error is silently ignored due =
+to the error handling issue mentioned elsewhere. Even if errors were prop=
+erly handled, it would be better to fail fast with a clear error message =
+before attempting the connection.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334817">internal/kafka/client.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	if auth !=3D nil &amp;&amp; auth.SASLMec=
+hanism !=3D &quot;&quot; {
++		// For now, assume SCRAM or PLAIN
++		// This is simplified; in real implementation, handle different mechan=
+isms
++		opts =3D append(opts, kgo.SASL(kgo.SASLType(auth.SASLMechanism), auth.=
+SASLUsername, auth.SASLPassword))
++	}
+</pre>
+<p dir=3D"auto">The SASL authentication implementation uses a simplified =
+approach with kgo.SASLType that may not work correctly. The franz-go libr=
+ary requires specific SASL mechanism constructors like scram.Auth() for S=
+CRAM mechanisms or plain.Auth() for PLAIN. Simply casting the mechanism n=
+ame string to SASLType is incorrect and will likely cause authentication =
+failures.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334824">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	icdRegex :=3D regexp.MustCompile(`\b[A-Z=
+]\d{2}(?:\.\d{1,3})?\b`)
++	text =3D icdRegex.ReplaceAllString(text, &quot;[ICD_REDACTED]&quot;)
++
++	// Mask dates of birth (DOB)
++	dobRegex :=3D regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
++	text =3D dobRegex.ReplaceAllString(text, &quot;[DOB_REDACTED]&quot;)
++
++	return text
++}
++
++// logAudit logs an audit event to the specified file if configured.
++func logAudit(message string) {
++	if Cfg.AuditLogFile =3D=3D &quot;&quot; {
++		return
++	}
++	file, err :=3D os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os=
+.O_WRONLY, 0644)
+</pre>
+<p dir=3D"auto">The audit log file is opened with world-readable permissi=
+ons (0644). For a security audit log that may contain sensitive informati=
+on about Kafka operations, access attempts, and configurations, this is t=
+oo permissive. The file should be created with more restrictive permissio=
+ns like 0600 to ensure only the owner can read it.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-	file, err :=3D os.OpenFile(Cfg.AuditLogFile,=
+ os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
++	file, err :=3D os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os=
+.O_WRONLY, 0600)
+</pre>
+
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334834">internal/analyzer/rules_topic.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	// Minimum retention for compliance (6 y=
+ears in milliseconds)
++	minRetentionMs :=3D int64(6 * 365 * 24 * 60 * 60 * 1000) // approx 1892=
+16000000
+</pre>
+<p dir=3D"auto">The minimum retention period calculation has an error in =
+the comment. The calculation <code class=3D"notranslate">6 * 365 * 24 * 6=
+0 * 60 * 1000</code> equals approximately 189,216,000,000 milliseconds (6=
+ years), but the comment says "approx 189216000000" without commas, which=
+ could be misleading. More importantly, the requirement of a 6-year minim=
+um retention period seems arbitrary and may not align with actual complia=
+nce requirements, which vary by regulation (e.g., HIPAA typically require=
+s 6 years, but other regulations differ). This should be configurable rat=
+her than hardcoded.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334843">internal/analyzer/rules_topic.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +		encryptionEnabled :=3D getConfigValue(b=
+roker.Configs, &quot;log.segment.encryption&quot;)
++
++		if encryptionEnabled =3D=3D &quot;&quot; || encryptionEnabled =3D=3D &=
+quot;&lt;null&gt;&quot; || encryptionEnabled =3D=3D &quot;false&quot; {
++			finding :=3D NewFinding(r.ID(), r.Name(), r.Severity(), r.Category())=
+.
++				WithDescription(&quot;Broker %d does not have log segment encryption=
+ enabled. &quot;+
++					&quot;Data at rest is not encrypted, which may violate compliance r=
+equirements for sensitive data.&quot;, broker.BrokerID).
++				WithResource(&quot;broker&quot;, fmt.Sprintf(&quot;%d&quot;, broker.=
+BrokerID)).
++				WithValues(encryptionEnabled, &quot;true&quot;).
++				WithRemediation(&quot;Enable log segment encryption by setting &#39;=
+log.segment.encryption=3Dtrue&#39; and configuring encryption keys. &quot=
+;+
++					&quot;Note: This requires Confluent Platform or custom encryption i=
+mplementation.&quot;).
++				WithReferences(
++					&quot;https://docs.confluent.io/platform/current/security/encrypt-d=
+ata-at-rest.html&quot;,
++				)
++			findings =3D append(findings, finding)
+</pre>
+<p dir=3D"auto">The encryption at rest check is looking for a configurati=
+on property "log.segment.encryption" that doesn't exist in Apache Kafka. =
+Apache Kafka does not have built-in encryption at rest; this is a feature=
+ provided by Confluent Platform or requires custom implementation at the =
+storage layer. The rule will always flag all brokers as non-compliant for=
+ standard Apache Kafka installations, even when encryption at rest is pro=
+perly implemented through filesystem-level encryption or cloud provider e=
+ncryption. This check should either be removed, made conditional based on=
+ the Kafka distribution, or check for different indicators of encryption =
+at rest.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334851">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt;  		}
+ =
+
+ 		engine :=3D analyzer.DefaultEngine()
+ 		result :=3D engine.Analyze(analysisCtx)
+ 		data.Analysis =3D convertAnalysisResult(result)
++		logAudit(fmt.Sprintf(&quot;Performed security analysis: %d findings&qu=
+ot;, len(result.Findings)))
++	}
++
++	analysisTime =3D time.Since(startTime)
++
++	// Print benchmark results if enabled
++	if Cfg.Benchmark {
++		fmt.Printf(&quot;\nPerformance Benchmark:\n&quot;)
++		fmt.Printf(&quot;  Connection Time: %v\n&quot;, connectionTime)
++		fmt.Printf(&quot;  Metadata Retrieval: %v\n&quot;, metadataTime)
++		fmt.Printf(&quot;  Config Retrieval: %v\n&quot;, configTime)
++		fmt.Printf(&quot;  ACL Retrieval: %v\n&quot;, aclTime)
++		fmt.Printf(&quot;  Message Sampling: %v\n&quot;, sampleTime)
++		fmt.Printf(&quot;  Security Analysis: %v\n&quot;, analysisTime)
++		fmt.Printf(&quot;  Total Time: %v\n&quot;, connectionTime+metadataTime=
++configTime+aclTime+sampleTime+analysisTime)
+</pre>
+<p dir=3D"auto">The benchmark timing for "Total Time" is calculated by su=
+mming individual operation times, but this doesn't account for the time s=
+pent in other operations not being measured (e.g., data conversion, outpu=
+t formatting, etc.). The total time should be measured from the very begi=
+nning of the function to the point before output to be accurate.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334863">internal/kafka/client.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +		if auth.SSLCertFile !=3D &quot;&quot; &=
+amp;&amp; auth.SSLKeyFile !=3D &quot;&quot; {
++			cert, err :=3D tls.LoadX509KeyPair(auth.SSLCertFile, auth.SSLKeyFile)=
+
++			if err !=3D nil {
++				// Handle error? For now, ignore or log
++			} else {
++				tlsConfig.Certificates =3D []tls.Certificate{cert}
++			}
++		}
++		if auth.SSLCAFile !=3D &quot;&quot; {
++			caCert, err :=3D os.ReadFile(auth.SSLCAFile)
++			if err !=3D nil {
++				// Handle error
++			} else {
++				caCertPool :=3D x509.NewCertPool()
++				caCertPool.AppendCertsFromPEM(caCert)
++				tlsConfig.RootCAs =3D caCertPool
++			}
++		}
+</pre>
+<p dir=3D"auto">Errors from loading TLS certificates and CA files are sil=
+ently ignored. If certificate loading fails, the client will proceed with=
+ incomplete TLS configuration, which could lead to connection failures or=
+ security issues. These errors should be propagated to the caller so they=
+ can be properly handled.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334874">internal/kafka/client.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +		if auth.MutualTLS {
++			tlsConfig.ClientAuth =3D tls.RequireAndVerifyClientCert
++		}
+</pre>
+<p dir=3D"auto">The ClientAuth field is set incorrectly. This field shoul=
+d be set on the server side, not the client side. For mutual TLS on the c=
+lient, the client only needs to provide its certificate in the Certificat=
+es field, which is already done above. Setting ClientAuth to RequireAndVe=
+rifyClientCert on the client has no effect and shows a misunderstanding o=
+f TLS configuration.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-		if auth.MutualTLS {
+-			tlsConfig.ClientAuth =3D tls.RequireAndVerifyClientCert
+-		}
+</pre>
+
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334885">internal/output/formatter.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +		// Escape commas and quotes in fields
++		description :=3D strings.ReplaceAll(finding.Description, &quot;,&quot;=
+, &quot;;&quot;)
++		description =3D strings.ReplaceAll(description, &quot;\&quot;&quot;, &=
+quot;\&quot;\&quot;&quot;)
++		remediation :=3D strings.ReplaceAll(finding.Remediation, &quot;,&quot;=
+, &quot;;&quot;)
++		remediation =3D strings.ReplaceAll(remediation, &quot;\&quot;&quot;, &=
+quot;\&quot;\&quot;&quot;)
+</pre>
+<p dir=3D"auto">The CSV escaping logic is incomplete. Simply replacing co=
+mmas with semicolons and double quotes with doubled quotes doesn't proper=
+ly handle all CSV edge cases. For instance, if a field contains newlines,=
+ they should also be properly escaped, and fields should only be quoted w=
+hen necessary or always quoted for consistency. Consider using the standa=
+rd encoding/csv package writer instead of manual escaping to ensure prope=
+r CSV formatting.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334889">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	// Mask medical record numbers (MRN) - c=
+ommon patterns
++	mrnRegex :=3D regexp.MustCompile(`\bMRN[:\s]*[A-Z0-9]{6,12}\b`)
+</pre>
+<p dir=3D"auto">The MRN (Medical Record Number) regex pattern requires th=
+e literal text "MRN" before the identifier, which will miss MRNs that app=
+ear without this prefix or use different labeling (e.g., "Medical Record:=
+ 123456", "Record #ABC123456"). This makes the anonymization incomplete a=
+nd could result in PHI exposure. Consider broadening the pattern or using=
+ multiple patterns to catch common MRN formats.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-	// Mask medical record numbers (MRN) - commo=
+n patterns
+-	mrnRegex :=3D regexp.MustCompile(`\bMRN[:\s]*[A-Z0-9]{6,12}\b`)
++	// Mask medical record numbers (MRN) - common patterns and labels
++	mrnRegex :=3D regexp.MustCompile(`(?i)\b(?:MRN|Medical\s*Record|Med(?:i=
+cal)?\s*Rec(?:ord)?|Record\s*#?)[:\s-]*[A-Z0-9]{6,12}\b`)
+</pre>
+
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334905">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	// Create auth config
++	auth :=3D &amp;kafka.AuthConfig{
++		SASLMechanism: Cfg.SASLMechanism,
++		SASLUsername:  Cfg.SASLUsername,
++		SASLPassword:  Cfg.SASLPassword,
++		SSLEnabled:    Cfg.SSLEnabled,
++		SSLCertFile:   Cfg.SSLCertFile,
++		SSLKeyFile:    Cfg.SSLKeyFile,
++		SSLCAFile:     Cfg.SSLCAFile,
++		MutualTLS:     Cfg.MutualTLS,
++	}
+</pre>
+<p dir=3D"auto">The function creates an AuthConfig struct with all the SA=
+SL and SSL configuration, but when the configuration is empty (all fields=
+ are empty strings or false), it still passes this auth object to the cli=
+ent. While this may not cause immediate errors, it's cleaner to pass nil =
+when no authentication is configured, which would also make the buildClie=
+ntOpts function simpler by checking if auth is nil.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334919">internal/kafka/client.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	if auth !=3D nil &amp;&amp; auth.SASLMec=
+hanism !=3D &quot;&quot; {
++		// For now, assume SCRAM or PLAIN
++		// This is simplified; in real implementation, handle different mechan=
+isms
++		opts =3D append(opts, kgo.SASL(kgo.SASLType(auth.SASLMechanism), auth.=
+SASLUsername, auth.SASLPassword))
++	}
+</pre>
+<p dir=3D"auto">There is no validation of the SASL credentials before the=
+y are used. If a user provides a SASL mechanism but forgets to provide us=
+ername or password, the code will attempt to connect with empty credentia=
+ls, which will fail. Consider adding validation to check that if SASLMech=
+anism is set, both SASLUsername and SASLPassword are also provided, and p=
+rovide a clear error message to the user.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334928">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	// Mask ICD codes
++	icdRegex :=3D regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
+</pre>
+<p dir=3D"auto">The ICD code regex pattern is too broad and will match ma=
+ny non-ICD codes. The pattern <code class=3D"notranslate">\b[A-Z]\d{2}(?:=
+\.\d{1,3})?\b</code> will match any single letter followed by two digits,=
+ which could include legitimate codes, abbreviations, or identifiers that=
+ aren't ICD codes (e.g., "A12.5" could be a product code). This will resu=
+lt in false positives where non-PHI data is unnecessarily redacted.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-	// Mask ICD codes
+-	icdRegex :=3D regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
++	// Mask ICD codes (require an explicit ICD prefix to reduce false posit=
+ives)
++	icdRegex :=3D regexp.MustCompile(`\b(?:ICD-10-CM|ICD-10|ICD10|ICD-9-CM|=
+ICD-9|ICD9)\s+[A-TV-Z]\d{2}(?:\.[0-9A-TV-Z]{1,4})?\b`)
+</pre>
+
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334939">internal/kafka/client.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +		kgo.DialTimeout(timeout),
++		kgo.RequestTimeoutOverhead(timeout),
++	}
++
+</pre>
+<p dir=3D"auto">When timeout is 0 (which happens in the SampleMessages fu=
+nction), the DialTimeout and RequestTimeoutOverhead options are set to 0.=
+ This will cause immediate timeout failures on connection attempts. The b=
+uildClientOpts function should handle the case where timeout is 0 by eith=
+er using a default timeout or omitting these options when sampling to inh=
+erit the default timeout from the original client creation.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-		kgo.DialTimeout(timeout),
+-		kgo.RequestTimeoutOverhead(timeout),
+-	}
+-
++	}
++
++	// Only override timeouts when a positive timeout is provided.
++	// When timeout is 0, we omit these options to inherit franz-go default=
+s.
++	if timeout &gt; 0 {
++		opts =3D append(opts,
++			kgo.DialTimeout(timeout),
++			kgo.RequestTimeoutOverhead(timeout),
++		)
++	}
+</pre>
+
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334957">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +// logAudit logs an audit event to the sp=
+ecified file if configured.
++func logAudit(message string) {
++	if Cfg.AuditLogFile =3D=3D &quot;&quot; {
++		return
++	}
++	file, err :=3D os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os=
+.O_WRONLY, 0644)
++	if err !=3D nil {
++		fmt.Fprintf(os.Stderr, &quot;Failed to open audit log: %v\n&quot;, err=
+)
++		return
++	}
++	defer file.Close()
++	timestamp :=3D time.Now().Format(time.RFC3339)
++	logEntry :=3D fmt.Sprintf(&quot;[%s] %s\n&quot;, timestamp, message)
++	file.WriteString(logEntry)
++}
+</pre>
+<p dir=3D"auto">The logAudit function lacks test coverage. Given that aud=
+it logging is a critical security feature for compliance tracking, it sho=
+uld have tests to verify that audit entries are written correctly with pr=
+oper timestamps, error handling works as expected, and file creation/perm=
+issions are correct.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334968">internal/output/formatter.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +// CSVFormatter outputs analysis results =
+in CSV format.
++type CSVFormatter struct {
++	writer io.Writer
++}
++
++// Format outputs the data in CSV format (primarily for analysis results=
+).
++func (f *CSVFormatter) Format(data *OutputData) error {
++	if data.Analysis =3D=3D nil {
++		fmt.Fprintf(f.writer, &quot;No analysis data available\n&quot;)
++		return nil
++	}
++
++	// CSV header
++	fmt.Fprintf(f.writer, &quot;Rule ID,Title,Severity,Category,Resource,Re=
+source Type,Current Value,Expected Value,Description,Remediation\n&quot;)=
+
++
++	// CSV rows
++	for _, finding :=3D range data.Analysis.Findings {
++		// Escape commas and quotes in fields
++		description :=3D strings.ReplaceAll(finding.Description, &quot;,&quot;=
+, &quot;;&quot;)
++		description =3D strings.ReplaceAll(description, &quot;\&quot;&quot;, &=
+quot;\&quot;\&quot;&quot;)
++		remediation :=3D strings.ReplaceAll(finding.Remediation, &quot;,&quot;=
+, &quot;;&quot;)
++		remediation =3D strings.ReplaceAll(remediation, &quot;\&quot;&quot;, &=
+quot;\&quot;\&quot;&quot;)
++
++		fmt.Fprintf(f.writer, &quot;\&quot;%s\&quot;,\&quot;%s\&quot;,\&quot;%=
+s\&quot;,\&quot;%s\&quot;,\&quot;%s\&quot;,\&quot;%s\&quot;,\&quot;%s\&qu=
+ot;,\&quot;%s\&quot;,\&quot;%s\&quot;,\&quot;%s\&quot;\n&quot;,
++			finding.RuleID,
++			finding.Title,
++			finding.Severity,
++			finding.Category,
++			finding.Resource,
++			finding.ResourceType,
++			finding.CurrentValue,
++			finding.ExpectedValue,
++			description,
++			remediation,
++		)
++	}
++
++	return nil
++}
+</pre>
+<p dir=3D"auto">The CSVFormatter lacks test coverage. There are no tests =
+to verify CSV escaping works correctly, headers are formatted properly, o=
+r that edge cases (empty fields, special characters, newlines) are handle=
+d. Given that CSV output is a new feature for security analysis reporting=
+, it should have comprehensive tests.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334972">internal/kafka/client.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +// buildClientOpts builds kgo client opti=
+ons from config.
++func buildClientOpts(brokers []string, timeout time.Duration, auth *Auth=
+Config) []kgo.Opt {
++	opts :=3D []kgo.Opt{
++		kgo.SeedBrokers(brokers...),
++		kgo.DialTimeout(timeout),
++		kgo.RequestTimeoutOverhead(timeout),
++	}
++
++	// Add SASL authentication if configured
++	if auth !=3D nil &amp;&amp; auth.SASLMechanism !=3D &quot;&quot; {
++		// For now, assume SCRAM or PLAIN
++		// This is simplified; in real implementation, handle different mechan=
+isms
++		opts =3D append(opts, kgo.SASL(kgo.SASLType(auth.SASLMechanism), auth.=
+SASLUsername, auth.SASLPassword))
++	}
++
++	// Add SSL/TLS if enabled
++	if auth !=3D nil &amp;&amp; auth.SSLEnabled {
++		tlsConfig :=3D &amp;tls.Config{}
++		if auth.SSLCertFile !=3D &quot;&quot; &amp;&amp; auth.SSLKeyFile !=3D =
+&quot;&quot; {
++			cert, err :=3D tls.LoadX509KeyPair(auth.SSLCertFile, auth.SSLKeyFile)=
+
++			if err !=3D nil {
++				// Handle error? For now, ignore or log
++			} else {
++				tlsConfig.Certificates =3D []tls.Certificate{cert}
++			}
++		}
++		if auth.SSLCAFile !=3D &quot;&quot; {
++			caCert, err :=3D os.ReadFile(auth.SSLCAFile)
++			if err !=3D nil {
++				// Handle error
++			} else {
++				caCertPool :=3D x509.NewCertPool()
++				caCertPool.AppendCertsFromPEM(caCert)
++				tlsConfig.RootCAs =3D caCertPool
++			}
++		}
++		if auth.MutualTLS {
++			tlsConfig.ClientAuth =3D tls.RequireAndVerifyClientCert
++		}
++		opts =3D append(opts, kgo.DialTLSConfig(tlsConfig))
++	}
++
++	return opts
++}
+</pre>
+<p dir=3D"auto">The authentication configuration handling in buildClientO=
+pts lacks test coverage. Since authentication is critical for secure conn=
+ections to production Kafka clusters, there should be tests verifying tha=
+t SASL and SSL/TLS options are correctly constructed, certificate loading=
+ works, and error cases are handled properly.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334974">internal/analyzer/rules_topic.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +// EncryptionAtRestRule checks if log seg=
+ment encryption is enabled.
++type EncryptionAtRestRule struct {
++	BaseRule
++}
++
++func (r *EncryptionAtRestRule) ID() string         { return &quot;ENC005=
+&quot; }
++func (r *EncryptionAtRestRule) Name() string       { return &quot;No Enc=
+ryption at Rest&quot; }
++func (r *EncryptionAtRestRule) Severity() Severity { return SeverityHigh=
+ }
++func (r *EncryptionAtRestRule) Category() Category { return CategoryEncr=
+yption }
++
++func (r *EncryptionAtRestRule) Description() string {
++	return &quot;Checks if log segment encryption is configured for data at=
+ rest protection&quot;
++}
++
++func (r *EncryptionAtRestRule) Evaluate(ctx *AnalysisContext) []*Finding=
+ {
++	if ctx.Configs =3D=3D nil {
++		return nil
++	}
++
++	var findings []*Finding
++
++	for _, broker :=3D range ctx.Configs.BrokerConfigs {
++		encryptionEnabled :=3D getConfigValue(broker.Configs, &quot;log.segmen=
+t.encryption&quot;)
++
++		if encryptionEnabled =3D=3D &quot;&quot; || encryptionEnabled =3D=3D &=
+quot;&lt;null&gt;&quot; || encryptionEnabled =3D=3D &quot;false&quot; {
++			finding :=3D NewFinding(r.ID(), r.Name(), r.Severity(), r.Category())=
+.
++				WithDescription(&quot;Broker %d does not have log segment encryption=
+ enabled. &quot;+
++					&quot;Data at rest is not encrypted, which may violate compliance r=
+equirements for sensitive data.&quot;, broker.BrokerID).
++				WithResource(&quot;broker&quot;, fmt.Sprintf(&quot;%d&quot;, broker.=
+BrokerID)).
++				WithValues(encryptionEnabled, &quot;true&quot;).
++				WithRemediation(&quot;Enable log segment encryption by setting &#39;=
+log.segment.encryption=3Dtrue&#39; and configuring encryption keys. &quot=
+;+
++					&quot;Note: This requires Confluent Platform or custom encryption i=
+mplementation.&quot;).
++				WithReferences(
++					&quot;https://docs.confluent.io/platform/current/security/encrypt-d=
+ata-at-rest.html&quot;,
++				)
++			findings =3D append(findings, finding)
++		}
++	}
++
++	return findings
++}
+</pre>
+<p dir=3D"auto">The EncryptionAtRestRule lacks test coverage. While there=
+ is a test for ShortRetentionRule, there's no corresponding test for the =
+encryption at rest rule. Given that this is a security rule with HIGH sev=
+erity, it should have tests to verify it correctly identifies when encryp=
+tion is disabled or the configuration is missing.</p>
+
+<hr>
+
+<p>In <a href=3D"https://github.com/RoseSecurity/kcatcher/pull/5#discussi=
+on_r2666334978">internal/brokers.go</a>:</p>
+<pre style=3D'color:#555'>&gt; +	defer file.Close()
++	timestamp :=3D time.Now().Format(time.RFC3339)
++	logEntry :=3D fmt.Sprintf(&quot;[%s] %s\n&quot;, timestamp, message)
++	file.WriteString(logEntry)
+</pre>
+<p dir=3D"auto">File handle may be writable as a result of data flow from=
+ a <a href=3D"1">call to OpenFile</a> and closing it may result in data l=
+oss upon failure, which is not handled explicitly.</p>
+=E2=AC=87=EF=B8=8F Suggested change
+<pre style=3D"color: #555">-	defer file.Close()
+-	timestamp :=3D time.Now().Format(time.RFC3339)
+-	logEntry :=3D fmt.Sprintf("[%s] %s\n", timestamp, message)
+-	file.WriteString(logEntry)
++	defer func() {
++		if err :=3D file.Close(); err !=3D nil {
++			fmt.Fprintf(os.Stderr, "Failed to close audit log: %v\n", err)
++		}
++	}()
++	timestamp :=3D time.Now().Format(time.RFC3339)
++	logEntry :=3D fmt.Sprintf("[%s] %s\n", timestamp, message)
++	if _, err :=3D file.WriteString(logEntry); err !=3D nil {
++		fmt.Fprintf(os.Stderr, "Failed to write to audit log: %v\n", err)
++	}
+</pre>
+
+
+<p style=3D"font-size:small;-webkit-text-size-adjust:none;color:#666;">&m=
+dash;<br />Reply to this email directly, <a href=3D"https://github.com/Ro=
+seSecurity/kcatcher/pull/5#pullrequestreview-3632563097">view it on GitHu=
+b</a>, or <a href=3D"https://github.com/notifications/unsubscribe-auth/BX=
+4XZNPTMBRWDMVFVLI2PI34FQRKVAVCNFSM6AAAAACQ3XCLUGVHI2DSMVQWIX3LMV43YUDVNRW=
+FEZLROVSXG5CSMV3GSZLXHMZTMMZSGU3DGMBZG4">unsubscribe</a>.<br />You are re=
+ceiving this because you authored the thread.<img src=3D"https://github.c=
+om/notifications/beacon/BX4XZNORQTAFLHZN7PAGCUL4FQRKVA5CNFSM6AAAAACQ3XCLU=
+GWGG33NNVSW45C7OR4XAZNRKB2WY3CSMVYXKZLTORJGK5TJMV32UY3PNVWWK3TUL5UWJTWYQS=
+BZS.gif" height=3D"1" width=3D"1" alt=3D"" /><span style=3D"color: transp=
+arent; font-size: 0; display: none; visibility: hidden; overflow: hidden;=
+ opacity: 0; width: 0; height: 0; max-width: 0; max-height: 0; mso-hide: =
+all">Message ID: <span>&lt;RoseSecurity/kcatcher/pull/5/review/3632563097=
+</span><span>@</span><span>github</span><span>.</span><span>com&gt;</span=
+></span></p>
+<script type=3D"application/ld+json">[
+{
+"@context": "http://schema.org",
+"@type": "EmailMessage",
+"potentialAction": {
+"@type": "ViewAction",
+"target": "https://github.com/RoseSecurity/kcatcher/pull/5#pullrequestrev=
+iew-3632563097",
+"url": "https://github.com/RoseSecurity/kcatcher/pull/5#pullrequestreview=
+-3632563097",
+"name": "View Pull Request"
+},
+"description": "View this Pull Request on GitHub",
+"publisher": {
+"@type": "Organization",
+"name": "GitHub",
+"url": "https://github.com"
+}
+}
+]</script>=
+
+----==_mimepart_695d7caae6eb7_cd10d0420018--

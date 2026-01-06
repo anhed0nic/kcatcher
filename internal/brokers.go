@@ -19,34 +19,41 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Pre-compiled regex patterns for PHI anonymization
+var (
+	emailRegex = regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
+	ssnRegex   = regexp.MustCompile(`\b\d{3}-\d{2}-\d{4}\b`)
+	phoneRegex = regexp.MustCompile(`\b\d{3}-\d{3}-\d{4}\b`)
+	ccRegex    = regexp.MustCompile(`\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b`)
+	// Improved MRN pattern to catch common variations
+	mrnRegex = regexp.MustCompile(`(?i)\b(?:MRN|Medical\s*Record|Med(?:ical)?\s*Rec(?:ord)?|Record\s*#?)[:\s-]*[A-Z0-9]{6,12}\b`)
+	// More specific ICD pattern requiring explicit ICD prefix
+	icdRegex = regexp.MustCompile(`\b(?:ICD-10-CM|ICD-10|ICD10|ICD-9-CM|ICD-9|ICD9)\s+[A-TV-Z]\d{2}(?:\.[0-9A-TV-Z]{1,4})?\b`)
+	// Contextual DOB pattern - matches DOB/date of birth followed by date
+	dobRegex = regexp.MustCompile(`(?i)\b(?:DOB|Date\s*of\s*Birth)[:\s-]*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})\b`)
+)
+
 // anonymizeData masks potential PHI in the given text.
 func anonymizeData(text string) string {
 	// Mask email addresses
-	emailRegex := regexp.MustCompile(`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`)
 	text = emailRegex.ReplaceAllString(text, "[EMAIL_REDACTED]")
 
-	// Mask potential SSN (XXX-XX-XXXX)
-	ssnRegex := regexp.MustCompile(`\b\d{3}-\d{2}-\d{4}\b`)
+	// Mask potential SSN (XXX-XX-XXXX) - note: phone numbers use different format
 	text = ssnRegex.ReplaceAllString(text, "[SSN_REDACTED]")
 
-	// Mask phone numbers (simple pattern)
-	phoneRegex := regexp.MustCompile(`\b\d{3}-\d{3}-\d{4}\b`)
+	// Mask phone numbers (XXX-XXX-XXXX) - different from SSN format
 	text = phoneRegex.ReplaceAllString(text, "[PHONE_REDACTED]")
 
 	// Mask credit card numbers (simple 16-digit)
-	ccRegex := regexp.MustCompile(`\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b`)
 	text = ccRegex.ReplaceAllString(text, "[CC_REDACTED]")
 
-	// Mask medical record numbers (MRN) - common patterns
-	mrnRegex := regexp.MustCompile(`\bMRN[:\s]*[A-Z0-9]{6,12}\b`)
+	// Mask medical record numbers (MRN) - improved pattern
 	text = mrnRegex.ReplaceAllString(text, "[MRN_REDACTED]")
 
-	// Mask ICD codes
-	icdRegex := regexp.MustCompile(`\b[A-Z]\d{2}(?:\.\d{1,3})?\b`)
+	// Mask ICD codes - more specific pattern
 	text = icdRegex.ReplaceAllString(text, "[ICD_REDACTED]")
 
-	// Mask dates of birth (DOB)
-	dobRegex := regexp.MustCompile(`\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b`)
+	// Mask dates of birth (DOB) - contextual pattern
 	text = dobRegex.ReplaceAllString(text, "[DOB_REDACTED]")
 
 	return text
@@ -57,15 +64,21 @@ func logAudit(message string) {
 	if Cfg.AuditLogFile == "" {
 		return
 	}
-	file, err := os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(Cfg.AuditLogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to open audit log: %v\n", err)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to close audit log: %v\n", err)
+		}
+	}()
 	timestamp := time.Now().Format(time.RFC3339)
 	logEntry := fmt.Sprintf("[%s] %s\n", timestamp, message)
-	file.WriteString(logEntry)
+	if _, err := file.WriteString(logEntry); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to write to audit log: %v\n", err)
+	}
 }
 
 // EnumerateBrokers connects to Kafka brokers and lists cluster metadata.
@@ -93,6 +106,7 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 
 	logAudit(fmt.Sprintf("Connected to brokers: %s", strings.Join(Cfg.Brokers, ",")))
 
+	totalStartTime := time.Now()
 	startTime := time.Now()
 	var connectionTime, metadataTime, configTime, aclTime, sampleTime, analysisTime time.Duration
 
@@ -102,16 +116,19 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 		brokerAddrs[i] = fmt.Sprintf("%s:%d", broker, Cfg.Port)
 	}
 
-	// Create auth config
-	auth := &kafka.AuthConfig{
-		SASLMechanism: Cfg.SASLMechanism,
-		SASLUsername:  Cfg.SASLUsername,
-		SASLPassword:  Cfg.SASLPassword,
-		SSLEnabled:    Cfg.SSLEnabled,
-		SSLCertFile:   Cfg.SSLCertFile,
-		SSLKeyFile:    Cfg.SSLKeyFile,
-		SSLCAFile:     Cfg.SSLCAFile,
-		MutualTLS:     Cfg.MutualTLS,
+	// Create auth config - only if authentication is actually configured
+	var auth *kafka.AuthConfig
+	if Cfg.SASLMechanism != "" || Cfg.SSLEnabled || Cfg.SSLCertFile != "" || Cfg.SSLKeyFile != "" || Cfg.SSLCAFile != "" || Cfg.MutualTLS {
+		auth = &kafka.AuthConfig{
+			SASLMechanism: Cfg.SASLMechanism,
+			SASLUsername:  Cfg.SASLUsername,
+			SASLPassword:  Cfg.SASLPassword,
+			SSLEnabled:    Cfg.SSLEnabled,
+			SSLCertFile:   Cfg.SSLCertFile,
+			SSLKeyFile:    Cfg.SSLKeyFile,
+			SSLCAFile:     Cfg.SSLCAFile,
+			MutualTLS:     Cfg.MutualTLS,
+		}
 	}
 
 	// Create Kafka client
@@ -219,6 +236,7 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 
 	// Print benchmark results if enabled
 	if Cfg.Benchmark {
+		totalTime := time.Since(totalStartTime)
 		fmt.Printf("\nPerformance Benchmark:\n")
 		fmt.Printf("  Connection Time: %v\n", connectionTime)
 		fmt.Printf("  Metadata Retrieval: %v\n", metadataTime)
@@ -226,7 +244,7 @@ func EnumerateBrokers(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  ACL Retrieval: %v\n", aclTime)
 		fmt.Printf("  Message Sampling: %v\n", sampleTime)
 		fmt.Printf("  Security Analysis: %v\n", analysisTime)
-		fmt.Printf("  Total Time: %v\n", connectionTime+metadataTime+configTime+aclTime+sampleTime+analysisTime)
+		fmt.Printf("  Total Time: %v\n", totalTime)
 	}
 
 	// Format and output

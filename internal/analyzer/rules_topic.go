@@ -289,48 +289,6 @@ func (r *ShortRetentionRule) Evaluate(ctx *AnalysisContext) []*Finding {
 	return findings
 }
 
-// EncryptionAtRestRule checks if log segment encryption is enabled.
-type EncryptionAtRestRule struct {
-	BaseRule
-}
-
-func (r *EncryptionAtRestRule) ID() string         { return "ENC005" }
-func (r *EncryptionAtRestRule) Name() string       { return "No Encryption at Rest" }
-func (r *EncryptionAtRestRule) Severity() Severity { return SeverityHigh }
-func (r *EncryptionAtRestRule) Category() Category { return CategoryEncryption }
-
-func (r *EncryptionAtRestRule) Description() string {
-	return "Checks if log segment encryption is configured for data at rest protection"
-}
-
-func (r *EncryptionAtRestRule) Evaluate(ctx *AnalysisContext) []*Finding {
-	if ctx.Configs == nil {
-		return nil
-	}
-
-	var findings []*Finding
-
-	for _, broker := range ctx.Configs.BrokerConfigs {
-		encryptionEnabled := getConfigValue(broker.Configs, "log.segment.encryption")
-
-		if encryptionEnabled == "" || encryptionEnabled == "<null>" || encryptionEnabled == "false" {
-			finding := NewFinding(r.ID(), r.Name(), r.Severity(), r.Category()).
-				WithDescription("Broker %d does not have log segment encryption enabled. "+
-					"Data at rest is not encrypted, which may violate compliance requirements for sensitive data.", broker.BrokerID).
-				WithResource("broker", fmt.Sprintf("%d", broker.BrokerID)).
-				WithValues(encryptionEnabled, "true").
-				WithRemediation("Enable log segment encryption by setting 'log.segment.encryption=true' and configuring encryption keys. "+
-					"Note: This requires Confluent Platform or custom encryption implementation.").
-				WithReferences(
-					"https://docs.confluent.io/platform/current/security/encrypt-data-at-rest.html",
-				)
-			findings = append(findings, finding)
-		}
-	}
-
-	return findings
-}
-
 // getTopicConfigValue is a helper to retrieve a config value by name from topic configs.
 func getTopicConfigValue(configs []kafka.ConfigEntry, name string) string {
 	for _, cfg := range configs {

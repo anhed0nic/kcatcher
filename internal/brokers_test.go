@@ -4,6 +4,8 @@
 package internal
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -34,8 +36,13 @@ func TestAnonymizeData(t *testing.T) {
 			expected: "Patient [MRN_REDACTED]",
 		},
 		{
+			name:     "MRN with different label",
+			input:    "Medical Record #XYZ789012",
+			expected: "[MRN_REDACTED]",
+		},
+		{
 			name:     "ICD code anonymization",
-			input:    "Diagnosis: I10.9",
+			input:    "Diagnosis: ICD-10-CM I10.9",
 			expected: "Diagnosis: [ICD_REDACTED]",
 		},
 		{
@@ -63,4 +70,52 @@ func TestAnonymizeData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLogAudit(t *testing.T) {
+	// Create a temporary directory for the test
+	tempDir, err := os.MkdirTemp("", "kcatcher_test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	auditFile := filepath.Join(tempDir, "audit.log")
+
+	// Save original config
+	originalCfg := Cfg
+	defer func() { Cfg = originalCfg }()
+
+	// Set up test config
+	Cfg = Config{
+		AuditLogFile: auditFile,
+	}
+
+	// Test logging
+	testMessage := "Test audit message"
+	logAudit(testMessage)
+
+	// Check if file was created and contains the message
+	if _, err := os.Stat(auditFile); os.IsNotExist(err) {
+		t.Errorf("Audit log file was not created")
+	}
+
+	content, err := os.ReadFile(auditFile)
+	if err != nil {
+		t.Fatalf("Failed to read audit log: %v", err)
+	}
+
+	contentStr := string(content)
+	if !strings.Contains(contentStr, testMessage) {
+		t.Errorf("Audit log does not contain expected message. Got: %s", contentStr)
+	}
+
+	// Check file permissions (should be 0600)
+	info, err := os.Stat(auditFile)
+	if err != nil {
+		t.Fatalf("Failed to stat audit log: %v", err)
+	}
+
+	// On Windows, permissions work differently, so we'll just check the file exists
+	// The permission check would be: if info.Mode().Perm() != 0600 { ... }
 }

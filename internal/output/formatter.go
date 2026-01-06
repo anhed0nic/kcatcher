@@ -4,6 +4,7 @@
 package output
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -260,18 +261,30 @@ func (f *CSVFormatter) Format(data *OutputData) error {
 		return nil
 	}
 
+	writer := csv.NewWriter(f.writer)
+	defer writer.Flush()
+
 	// CSV header
-	fmt.Fprintf(f.writer, "Rule ID,Title,Severity,Category,Resource,Resource Type,Current Value,Expected Value,Description,Remediation\n")
+	header := []string{
+		"Rule ID",
+		"Title",
+		"Severity",
+		"Category",
+		"Resource",
+		"Resource Type",
+		"Current Value",
+		"Expected Value",
+		"Description",
+		"Remediation",
+	}
+
+	if err := writer.Write(header); err != nil {
+		return fmt.Errorf("failed to write CSV header: %w", err)
+	}
 
 	// CSV rows
 	for _, finding := range data.Analysis.Findings {
-		// Escape commas and quotes in fields
-		description := strings.ReplaceAll(finding.Description, ",", ";")
-		description = strings.ReplaceAll(description, "\"", "\"\"")
-		remediation := strings.ReplaceAll(finding.Remediation, ",", ";")
-		remediation = strings.ReplaceAll(remediation, "\"", "\"\"")
-
-		fmt.Fprintf(f.writer, "\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n",
+		row := []string{
 			finding.RuleID,
 			finding.Title,
 			finding.Severity,
@@ -280,9 +293,13 @@ func (f *CSVFormatter) Format(data *OutputData) error {
 			finding.ResourceType,
 			finding.CurrentValue,
 			finding.ExpectedValue,
-			description,
-			remediation,
-		)
+			finding.Description,
+			finding.Remediation,
+		}
+
+		if err := writer.Write(row); err != nil {
+			return fmt.Errorf("failed to write CSV row: %w", err)
+		}
 	}
 
 	return nil

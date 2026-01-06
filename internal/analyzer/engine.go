@@ -19,7 +19,10 @@ type AnalysisContext struct {
 	// ACLs contains the access control list entries.
 	ACLs []kafka.ACLEntry
 
-	// SampleTopic indicates if message sampling is enabled.
+	// SampleTopic is the name of a Kafka topic whose messages may be sampled
+	// for content inspection. It is used by rules such as the PHI exposure risk
+	// rule to analyze real message payloads for sensitive data when assessing
+	// the cluster's exposure risk.
 	SampleTopic string
 }
 
@@ -158,7 +161,6 @@ func DefaultEngine() *Engine {
 		&WeakSSLProtocolRule{},
 		&NoSSLClientAuthRule{},
 		&NoEndpointIdentificationRule{},
-		&EncryptionAtRestRule{},
 	)
 
 	// ACL rules

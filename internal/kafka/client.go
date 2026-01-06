@@ -9,10 +9,13 @@ import (
 	"crypto/x509"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
+	"github.com/twmb/franz-go/pkg/sasl/plain"
+	"github.com/twmb/franz-go/pkg/sasl/scram"
 )
 
 // Client wraps the franz-go Kafka client for metadata operations.
@@ -37,7 +40,10 @@ type AuthConfig struct {
 
 // NewClient creates a new Kafka client with the given broker addresses.
 func NewClient(brokers []string, timeout time.Duration, auth *AuthConfig) (*Client, error) {
-	opts := buildClientOpts(brokers, timeout, auth)
+	opts, err := buildClientOpts(brokers, timeout, auth)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build client options: %w", err)
+	}
 
 	client, err := kgo.NewClient(opts...)
 	if err != nil {
@@ -53,18 +59,48 @@ func NewClient(brokers []string, timeout time.Duration, auth *AuthConfig) (*Clie
 }
 
 // buildClientOpts builds kgo client options from config.
-func buildClientOpts(brokers []string, timeout time.Duration, auth *AuthConfig) []kgo.Opt {
+func buildClientOpts(brokers []string, timeout time.Duration, auth *AuthConfig) ([]kgo.Opt, error) {
 	opts := []kgo.Opt{
 		kgo.SeedBrokers(brokers...),
-		kgo.DialTimeout(timeout),
-		kgo.RequestTimeoutOverhead(timeout),
+	}
+
+	// Only override timeouts when a positive timeout is provided.
+	// When timeout is 0, we omit these options to inherit franz-go defaults.
+	if timeout > 0 {
+		opts = append(opts,
+			kgo.DialTimeout(timeout),
+			kgo.RequestTimeoutOverhead(timeout),
+		)
 	}
 
 	// Add SASL authentication if configured
 	if auth != nil && auth.SASLMechanism != "" {
-		// For now, assume SCRAM or PLAIN
-		// This is simplified; in real implementation, handle different mechanisms
-		opts = append(opts, kgo.SASL(kgo.SASLType(auth.SASLMechanism), auth.SASLUsername, auth.SASLPassword))
+		// Validate SASL credentials
+		if auth.SASLUsername == "" || auth.SASLPassword == "" {
+			return nil, fmt.Errorf("SASL authentication requires both username and password")
+		}
+
+		var saslMechanism kgo.Opt
+		switch strings.ToUpper(auth.SASLMechanism) {
+		case "PLAIN":
+			saslMechanism = kgo.SASL(plain.Auth{
+				User: auth.SASLUsername,
+				Pass: auth.SASLPassword,
+			}.AsMechanism())
+		case "SCRAM-SHA-256":
+			saslMechanism = kgo.SASL(scram.Auth{
+				User: auth.SASLUsername,
+				Pass: auth.SASLPassword,
+			}.AsSha256Mechanism())
+		case "SCRAM-SHA-512":
+			saslMechanism = kgo.SASL(scram.Auth{
+				User: auth.SASLUsername,
+				Pass: auth.SASLPassword,
+			}.AsSha512Mechanism())
+		default:
+			return nil, fmt.Errorf("unsupported SASL mechanism: %s", auth.SASLMechanism)
+		}
+		opts = append(opts, saslMechanism)
 	}
 
 	// Add SSL/TLS if enabled
@@ -73,28 +109,27 @@ func buildClientOpts(brokers []string, timeout time.Duration, auth *AuthConfig) 
 		if auth.SSLCertFile != "" && auth.SSLKeyFile != "" {
 			cert, err := tls.LoadX509KeyPair(auth.SSLCertFile, auth.SSLKeyFile)
 			if err != nil {
-				// Handle error? For now, ignore or log
-			} else {
-				tlsConfig.Certificates = []tls.Certificate{cert}
+				return nil, fmt.Errorf("failed to load SSL certificate: %w", err)
 			}
+			tlsConfig.Certificates = []tls.Certificate{cert}
 		}
 		if auth.SSLCAFile != "" {
 			caCert, err := os.ReadFile(auth.SSLCAFile)
 			if err != nil {
-				// Handle error
-			} else {
-				caCertPool := x509.NewCertPool()
-				caCertPool.AppendCertsFromPEM(caCert)
-				tlsConfig.RootCAs = caCertPool
+				return nil, fmt.Errorf("failed to read SSL CA file: %w", err)
 			}
+			caCertPool := x509.NewCertPool()
+			if !caCertPool.AppendCertsFromPEM(caCert) {
+				return nil, fmt.Errorf("failed to parse SSL CA certificate")
+			}
+			tlsConfig.RootCAs = caCertPool
 		}
-		if auth.MutualTLS {
-			tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
-		}
+		// Note: ClientAuth is a server-side setting, not client-side
+		// Mutual TLS is enabled by providing client certificates above
 		opts = append(opts, kgo.DialTLSConfig(tlsConfig))
 	}
 
-	return opts
+	return opts, nil
 }
 }
 
